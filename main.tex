@@ -1,4 +1,12 @@
-\documentclass{article}
+\documentclass[10pt,twocolumn,letterpaper]{article}
+
+\usepackage{cvpr}
+\usepackage{times}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
 \usepackage[utf8]{inputenc}
 \usepackage{listings}
 \usepackage{float}
@@ -9,11 +17,48 @@
 \usepackage{verbatim}
 \usepackage{cite}
 
-\title{Experiments in Deferred Shading for Training Image Classifiers}
-\author{Kristofer Schlachter, Connor DeFanti, Ken Perlin}
-\date{}
-\begin{document}
+% Include other packages here, before hyperref.
 
+% If you comment hyperref and then uncomment it, you should delete
+% egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
+% run, let it finish, and you should be clear).
+\usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
+
+\cvprfinalcopy % *** Uncomment this line for the final submission
+
+\def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
+\def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
+
+% Pages are numbered in submission mode, and unnumbered in camera-ready
+\ifcvprfinal\pagestyle{empty}\fi
+\begin{document}
+%%%%%%%%% TITLE
+\title{Experiments in Deferred Shading for Training Image Classifiers}
+
+\author{Kristofer Schlachter\\
+NYU\\
+{\tt\small schlacht@cims.nyu.edu}
+% For a paper whose authors are all at the same institution,
+% omit the following lines up until the closing ``}''.
+% Additional authors and addresses can be added with ``\and'',
+% just like the second author.
+% To save space, use either the email address or home page, not both
+\and
+Connor DeFanti\\
+NYU\\
+{\tt\small defanti@cims.nyu.edu}
+\and
+Ken Perlin\\
+NYU\\
+{\tt\small perlin@nyu.edu}
+\and
+Jonathan Tompson\\
+Google Brain\\
+{\tt\small tompson@google.com}
+}
+
+\maketitle
+%\thispagestyle{empty}
 \maketitle
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -124,7 +169,7 @@ The encoding of our geometry state into G-Buffers allows for simplified testing 
 In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figures \ref{fig:GBUFFER_ALBEDO}, \ref{fig:GBUFFER_NORMALS}, and \ref{fig:GBUFFER_DEPTH} for examples.
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{./assets/synth_albedo.jpg}
+\includegraphics[width=0.8\columnwidth]{./assets/synth_albedo.jpg}
 \caption{Albedo Map}
 \label{fig:GBUFFER_ALBEDO}
 \end{figure}
@@ -138,14 +183,14 @@ In our experiments, our G-Buffer consists of the scene encoded geometry normals,
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{./assets/synth_world_normals.jpg}
+\includegraphics[width=1.0\columnwidth]{./assets/synth_world_normals.jpg}
 \caption{World Space Normals Map in RGB}
 \label{fig:GBUFFER_NORMALS}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{./assets/synth_linear_depth.jpg}
+\includegraphics[width=1.0\columnwidth]{./assets/synth_linear_depth.jpg}
 \caption{Depth Map}
 \label{fig:GBUFFER_DEPTH}
 \end{figure}
@@ -155,13 +200,13 @@ In our experiments, our G-Buffer consists of the scene encoded geometry normals,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/SHBands.png}
+\includegraphics[width=1.0\columnwidth]{./assets/SHBands.png}
 \caption{Visualization of first 3 bands of the spherical harmonics functions. ``Plotted as unsigned spherical functions by distance from the origin and by color on unit sphere. Green are positive values and red are negative.'' \cite{G03}  These are the corresponding 9 functions to the 9 coefficients we learn for lighting.}
 \label{fig:SHBands01}
 \end{figure}
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{./assets/SHOneBandNoCaption.pdf}
+\includegraphics[width=0.8\columnwidth]{./assets/SHOneBandNoCaption.pdf}
 \caption{Visualization of lighting function using [RIGHT] a lit sphere  and [LEFT] lobes. \cite{G03}}
 \label{fig:SHBands02}
 \end{figure}
@@ -189,12 +234,12 @@ Given that we are only allowing smoothly changing lighting, there is a very simp
 
 \begin{figure}
 \centering
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.5\columnwidth}
   \centering
   \includegraphics[width=0.8\linewidth]{./assets/AO_DiffuseOnly.jpg}
   \label{fig:AO1_diffuse}
 \end{subfigure}%
-\begin{subfigure}{.5\textwidth}
+\begin{subfigure}{.5\columnwidth}
   \centering
   \includegraphics[width=0.8\linewidth]{./assets/AO_FullAO.jpg}
   \label{fig:AO1_fullao}
@@ -264,7 +309,7 @@ Training with real data then using the model to classify real test images gives 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/NORBTestSmall.png}
+\includegraphics[width=1.0\columnwidth]{./assets/NORBTestSmall.png}
 \caption{A sample of the NORB test dataset. Note the dark shadows under some of the models, animals in particular.}
 \label{fig:norb-samples}
 \end{figure}
@@ -294,7 +339,7 @@ The NORB dataset does have its shortcomings. The dataset is black and white, low
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\textwidth]{./assets/david_scanner.JPG}
+\includegraphics[width=0.8\columnwidth]{./assets/david_scanner.JPG}
 \caption{A picture of the scanner setup used to generate 3D models of the physical toys. The turntable used to rotate the toys to get a full 360-degree view is not shown here.}
 \label{fig:david}
 \end{figure}
@@ -310,7 +355,7 @@ In order to properly measure the impact of these various techniques, it is impor
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/vgg08_diagram.pdf}
+\includegraphics[width=1.0\columnwidth]{./assets/vgg08_diagram.pdf}
 \caption{Architecture of VGG08 Batch Norm Classifier}
 \label{fig:VGG_DAIGRAM}
 \end{figure}
@@ -357,14 +402,14 @@ To establish a baseline for minimal performance, we train with just the albedo m
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 \centering
-\includegraphics[trim={0 0 392px 687px},clip,width=1.0\textwidth]{./assets/SH_LitTrainingData.jpg}
+\includegraphics[trim={0 0 392px 687px},clip,width=1.0\columnwidth]{./assets/SH_LitTrainingData.jpg}
 \caption{Learned spherical harmonics lighting and diffuse shading without albedo.  Notice that it cannot learn the albedo of the object and it affects what lighting function it learns.  The ground plane normal dominates the loss and biases the lighting distribution.}
 \label{fig:SH_ONLY}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[trim={0 0 392px 687px},clip,width=1.0\textwidth]{./assets/Best_Learned_SH_Image_Training_Data.jpg}
+\includegraphics[trim={0 0 392px 687px},clip,width=1.0\columnwidth]{./assets/Best_Learned_SH_Image_Training_Data.jpg}
 \caption{Albedo multiplied by learned spherical harmonics lighting with diffuse shading.}
 \label{fig:SH_and_Albedo}
 \end{figure}
@@ -372,7 +417,7 @@ To establish a baseline for minimal performance, we train with just the albedo m
 
 \begin{figure}[h!]
 \centering
-\includegraphics[trim={0 0 392px 687px},clip,width=1.0\textwidth]{./assets/Learned_SH_plus_AO_and_Albedo.jpg}
+\includegraphics[trim={0 0 392px 687px},clip,width=1.0\columnwidth]{./assets/Learned_SH_plus_AO_and_Albedo.jpg}
 \caption{Learned spherical harmonics lighting with albedo and ambient occlusion and diffuse shading.}
 \label{fig:SH_AO_ALBEDO}
 \end{figure}
@@ -391,7 +436,7 @@ For examples of a learned SH lighting combined with albedo, see figure \ref{fig:
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/2bounce_small.png}
+\includegraphics[width=1.0\columnwidth]{./assets/2bounce_small.png}
 \caption{Two Bounce Rendering.  Notice it is the equivalent to a shadow mapped scene and differs from the AO composited scenes by the sharpness of the shadows. This is due to the scene using a single directional light.}
 \label{fig:2BOUNCE}
 \end{figure}
@@ -402,7 +447,7 @@ Now that we have seen that an approximate shadow (Ambient Occlusion) helps the c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Varying Sample Count in the Mitsuba Path Tracer}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{table}[]
+\begin{table*}[]
 \centering
 
 \begin{tabular}{|l|r|r|r|r|}
@@ -416,12 +461,12 @@ Multiple GAN& 85.23\%                                   & 84.37\%               
 \end{tabular}
 \caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs. $\Delta$ vs Real has two numbers. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba).}
 \label{tblallrefined}
-\end{table}
+\end{table*}
 
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/DifferentSampleCounts.png}
+\includegraphics[width=1.0\columnwidth]{./assets/DifferentSampleCounts.png}
 \caption{
 Mitsuba renders at different sample counts. Top: 1 sample per pixel.  Middle: 4 samples per pixel.  Bottom: 128 samples per pixel
 }
@@ -469,7 +514,7 @@ We generated datasets using just one per pixel and four samples per pixel. We th
 Knowing that noisy images are still useful for training, we leverage the information in them to create a new image that performs better. Utilizing noisy images and equivalent ground truth versions, we ran experiments where we learned to denoise the images before training.  We implemented a simplified version of the network in \cite{Chaitanya:2017:IRM:3072959.3073601}.  We remove the recurrent part of the architecture because we are not learning animated sequences of images where noise removal has to be consistent across frames. The paper describes their architecture as a denoising auto-encoder with skip connections.  Our simplified version is shown in figure \ref{fig:denoise}. 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/denoiser_diagram.pdf}
+\includegraphics[width=1.0\columnwidth]{./assets/denoiser_diagram.pdf}
 \caption{Architecture of Denoising Model}
 \label{fig:denoise}
 \end{figure}
@@ -556,21 +601,21 @@ When evaluating performance of using a single GAN, we took each saved GAN and tr
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/128sampleGANComparison_75_26.png}
+\includegraphics[width=1.0\columnwidth]{./assets/128sampleGANComparison_75_26.png}
 \caption{Bottom: 128 sample Mitsuba passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between full sample the rendered image and the refined image. This particular GAN seems to have brightened up the object albedo and dramatically expanded the shadows.  The performance of using the output from this refiner was 75.26\%. and training directly off of the 128 sample target achieved 74.84\%.}
 \label{fig:GAN_128}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/4sampleGANComparison_77_65.png}
+\includegraphics[width=1.0\columnwidth]{./assets/4sampleGANComparison_77_65.png}
 \caption{Bottom: 4 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sample rendered image and the refined image. This particular GAN seems to have brightened up the object albedo, denoised it, lightend it and expanded the shadows to the left.  The performance of using the output from this refiner was 77.65\%. and training directly off of the 4 sample target achieved 72.89\%.  Training off the denoised image achieved 73.56\%.}
 \label{fig:GAN_4}
 \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\textwidth]{./assets/1sampleGANComparison_72_84.png}
+\includegraphics[width=1.0\columnwidth]{./assets/1sampleGANComparison_72_84.png}
 \caption{Bottom: 1 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sampled rendered image and the refined image. This particular GAN seems to have brightened up the object albedo so much that it erased the top parts of the objects. It has denoised it and has darkened and expanded the shadows down and to the left.  The performance of using the output from this refiner was 72.84\%. and training directly off of the 1 sample target achieved 57.21\%.  Training off the denoised image achieved 71.48\%.}
 \label{fig:GAN_1}
 \end{figure}
