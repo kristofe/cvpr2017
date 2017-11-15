@@ -29,6 +29,8 @@
 \def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
 
+\newcommand{\jonathan}[1]{{\color{green} J: #1}}
+
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifcvprfinal\pagestyle{empty}\fi
 \begin{document}
@@ -47,6 +49,10 @@ NYU\\
 Connor DeFanti\\
 NYU\\
 {\tt\small defanti@cims.nyu.edu}
+\and
+Sebastian Herscher\\
+NYU\\
+{\tt\small herscher@nyu.edu}
 \and
 Ken Perlin\\
 NYU\\
@@ -89,7 +95,7 @@ Capitalizing on this standard 3D scene representation we setup a number of exper
 \begin{enumerate}
 \item We provide a dataset that allows the direct comparison of training on real data versus synthetic by including 3D scans of the objects that are in the photographic dataset.
 \item We create multiple partially differentiable renderers that can learn shading functions.
-\item We a method of using GAN trained generative models in a novel way to create an augmented dataset.
+\item We have a method of using GAN trained generative models in a novel way to create an augmented dataset.
 \item We contribute a thorough comparison of the performance of all the rendering methods with real data.
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -163,36 +169,14 @@ In real-time rendering, a popular way to draw images is to store the rasterized 
 
 G-Buffers separate the geometric processes such as transformation, projection and depth testing, from physical processes such as shading and texture mapping.  This is accomplished by the buffers accumulating the geometry information in the first pass and then lighting each pixel of the output on a second pass.  This is in comparison to a forward renderer which calculates geometry information and performs lighting and shadowing in one pass, followed by and writing the result to the output buffer.  
 %The inefficiency that the G-Buffer addresses is that the information can then be replaced by an object that is drawn later in the stream.  Pixels can be overdrawn many many times which can cause a lot of wasted lighting computation. 
-G-Buffers allow for ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.\\
-
-The encoding of our geometry state into G-Buffers allows for simplified testing of different shading techniques on the identical 3D scenes.
-In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figures \ref{fig:GBUFFER_ALBEDO}, \ref{fig:GBUFFER_NORMALS}, and \ref{fig:GBUFFER_DEPTH} for examples.
+G-Buffers allow for ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.
+ The encoding of our geometry state into G-Buffers allows for simplified testing of different shading techniques on the identical 3D scenes.
+In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figure \ref{fig:GBUFFER_ALBEDO}, for examples.
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\columnwidth]{./assets/synth_albedo.jpg}
-\caption{Albedo Map}
+\includegraphics[width=0.8\columnwidth]{./assets/synth_gbuffer_framed.png}
+\caption{G-Buffer. Top is Albedo, Middle is depth (Contrast was adjusted for display), Bottom is world space normals.}
 \label{fig:GBUFFER_ALBEDO}
-\end{figure}
-
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[width=0.8\textwidth]{./assets/ao_sample.png}
-%\caption{Occlusion Map}
-%\label{fig:GBUFFER_SHADOW}
-%\end{figure}
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=1.0\columnwidth]{./assets/synth_world_normals.jpg}
-\caption{World Space Normals Map in RGB}
-\label{fig:GBUFFER_NORMALS}
-\end{figure}
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=1.0\columnwidth]{./assets/synth_linear_depth.jpg}
-\caption{Depth Map}
-\label{fig:GBUFFER_DEPTH}
 \end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -200,19 +184,19 @@ In our experiments, our G-Buffer consists of the scene encoded geometry normals,
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\columnwidth]{./assets/SHBands.png}
-\caption{Visualization of first 3 bands of the spherical harmonics functions. ``Plotted as unsigned spherical functions by distance from the origin and by color on unit sphere. Green are positive values and red are negative.'' \cite{G03}  These are the corresponding 9 functions to the 9 coefficients we learn for lighting.}
+\includegraphics[width=1.0\columnwidth]{./assets/SH_Fig.jpg}
+\caption{Visualization of first 3 bands of the spherical harmonics functions. Red are negative values and blue are positive. These are the corresponding 9 functions to the 9 coefficients we learn for lighting.}
 \label{fig:SHBands01}
 \end{figure}
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\columnwidth]{./assets/SHOneBandNoCaption.pdf}
-\caption{Visualization of lighting function using [RIGHT] a lit sphere  and [LEFT] lobes. \cite{G03}}
-\label{fig:SHBands02}
-\end{figure}
+%\begin{figure}[h!]
+%\centering
+%\includegraphics[width=0.8\columnwidth]{./assets/SHOneBandNoCaption.pdf}
+%\caption{Visualization of lighting function using [RIGHT] a lit sphere  and [LEFT] lobes. \cite{G03}}
+%\label{fig:SHBands02}
+%\end{figure}
 In our experiments, we also use a set of functions called Spherical Harmonics (SH) to learn the lighting in the environment. Spherical harmonics are a set of functions that approximate an arbitrary spherical function, such as the distribution of incoming or outgoing light \cite{Ramamoorthi:2001:ERI:383259.383317}.  They are continuous and rotationally invariant. They are grouped into levels, where each level is a set of orthogonal functions of finer detail, resolution, or frequency \cite{Shreiner:2013:OPG:2544032}.  To represent the smooth lighting in our experiments, we only need the first three levels which are a constant, linear polynomials, and quadratic polynomials of the surface normal.\\
 
-See Figure \ref{fig:SHBands01} for a visualization of the first three levels and see Figure \ref{fig:SHBands02} to see a visualization of a diffuse lighting function.\\
+See Figure \ref{fig:SHBands01} for a visualization of the first three levels.\\% and see Figure \ref{fig:SHBands02} to see a visualization of a diffuse lighting function.\\
 
 An advantage to using spherical harmonics for lighting is that you can represent a smooth lighting environment with just 9 floats.  This allows us to parameterize a lighting function with far fewer parameters compared to other representations\footnote{Image Based Lighting for instance.  It requires 6 images!}. This has the effect of drastically reducing the search space when trying to learn a parameterized lighting.
 
@@ -226,27 +210,27 @@ We used this representational advantage in our experiments by creating a pyTorch
 \subsubsection{Ambient Occlusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Given that we are only allowing smoothly changing lighting, there is a very simple first order approximation to global illumination that can approximate it. It is called Ambient Occlusion and it is considered a form of global illumination because it takes into account the geometry in the scene\cite{Miller:1994:EAL:192161.192244}.  For each point on the surface of the scene geometry, it approximates how exposed it is to incoming ambient light sources.  It does this by calculating how much of the hemisphere around that point is blocked by nearby surfaces. For lighting conditions is close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination\footnote{See Figure~\ref{fig:AO1} to see how it effects an object if it were rendered in an unoccluded space. The animal's body geometry demonstrates self-occlusion, whereas the ground shows how other objects block incoming ambient light.}.\\
+Given that we are only allowing smoothly changing lighting, there is a very simple first order approximation to global illumination that can approximate it. It is called Ambient Occlusion and it is considered a form of global illumination because it takes into account the geometry in the scene\cite{Miller:1994:EAL:192161.192244}.  For each point on the surface of the scene geometry, it approximates how exposed it is to incoming ambient light sources.  It does this by calculating how much of the hemisphere around that point is blocked by nearby surfaces. For lighting conditions is close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination. \\%\footnote{See Figure~\ref{fig:AO1} to see how it effects an object if it were rendered in an unoccluded space. The animal's body geometry demonstrates self-occlusion, whereas the ground shows how other objects block incoming ambient light.}.\\
 %We use this method in our experiments to see how good an approximation it is for global illumination.  As far as our experiments show it isn't very good compared to a full GI renderer.  %TODO: Where is the result of the experiment (Training with AO)?
 
 
 %This information is used in realtime 3D engines to help make the shading more realistic, while being significantly faster to compute than true global illumination.  It is usually computed offline for static scenes, but can also be approximated in screen space using the depth information encoded into the G-Buffer.
-
-\begin{figure}
-\centering
-\begin{subfigure}{.5\columnwidth}
-  \centering
-  \includegraphics[width=0.8\linewidth]{./assets/AO_DiffuseOnly.jpg}
-  \label{fig:AO1_diffuse}
-\end{subfigure}%
-\begin{subfigure}{.5\columnwidth}
-  \centering
-  \includegraphics[width=0.8\linewidth]{./assets/AO_FullAO.jpg}
-  \label{fig:AO1_fullao}
-\end{subfigure}
-\caption{[LEFT] Diffuse Shading, [RIGHT] Ambient Occlusion and Diffuse Shading }
-\label{fig:AO1}
-\end{figure}
+%
+%\begin{figure}
+%\centering
+%\begin{subfigure}{.5\columnwidth}
+%  \centering
+%  \includegraphics[width=0.8\linewidth]{./assets/AO_DiffuseOnly.jpg}
+%  \label{fig:AO1_diffuse}
+%\end{subfigure}%
+%\begin{subfigure}{.5\columnwidth}
+%  \centering
+%  \includegraphics[width=0.8\linewidth]{./assets/AO_FullAO.jpg}
+%  \label{fig:AO1_fullao}
+%\end{subfigure}
+%\caption{[LEFT] Diffuse Shading, [RIGHT] Ambient Occlusion and Diffuse Shading }
+%\label{fig:AO1}
+%\end{figure}
 
 \begin{comment}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -301,7 +285,7 @@ In order to simulate global illumination in our experiments, we used an open sou
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Direct comparisons between rendering techniques and real images could not be done without creating a dataset that allows for it.  We were able to identify the NYU Object Recognition Benchmark (NORB) dataset \cite{LeCun:2004:LMG:1896300.1896315} as a good starting point. Despite its age, it has enough advantages for it to be useful.  It is also simple and small enough to allow for recreation of each photograph shot for shot.  A characteristic that makes NORB even more attractive is that the object location, rotation and camera placement are known for every image.
 
-However, the NORB dataset is black and white, and we wanted to also collect data on a colorized set of images. In order to do this, we generated renders in
+However, the NORB dataset is black and white, and we wanted to also collect data on a colorized set of images. In order to do this, we generated renders of OBJ files from Shapenet \cite{DBLP:journals/corr/ChangFGHHLSSSSX15}. We chose an entirely different set of models and model categories than what existed in NORB. However, because we could not create accurate real representations of the models, we had to test on a different set of Shapenet synthetic renders.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{NORB Dataset}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -317,36 +301,61 @@ Training with real data then using the model to classify real test images gives 
 \end{figure}
 %The NORB \cite{LeCun:2004:LMG:1896300.1896315} dataset is quite old and simple and is not used to train and test classifiers anymore.  However the nature of the dataset allows it to be very useful in experimenting with rendering techniques due to the characteristics of the data.\\
 
-The objects within the NORB dataset are a set of 50 toys split into a 25 object training set and a 25 object test set. The dataset is stereo photographs of the objects on a turntable in 6 controlled lighting conditions, 18 uniform rotations and 9 elevations. This results in a dataset with 48,600 stereo pictures.  We focus on just the 25 objects in the training set consisting of $6\cdot9\cdot18\cdot25=24,300$ images in the dataset we generated for our tests.  We also confined our dataset to one lighting condition to keep it uniform across all images.  This reduces the image count in the training dataset to 4,050 images.   The toys were painted a uniform color with a matte paint. This was intended to prevent texture from being used in classification. \\
+The objects within the NORB dataset are a set of 50 toys split into a 25 object training set and a 25 object test set. The dataset is stereo photographs of the objects on a turntable in 6 controlled lighting conditions, 18 uniform rotations and 9 elevations. This results in a dataset with 48,600 stereo pictures.  We focus on just the 25 objects in the training set consisting of $6\cdot9\cdot18\cdot25=24,300$ images in the dataset we generated for our tests.  We also confined our dataset to one lighting condition to keep it uniform across all images.  This reduces the image count in the training dataset to 4,050 images.   The toys were painted a uniform color with a matte paint. This was intended to prevent texture from being used in classification.
 
-All of the properties listed above facilitate a recreation of the original scenes through 3D rendering. We know the pose, location and surface of the objects as well as the location of the camera. We set the material properties of the objects to be a uniform color and diffusely reflective. This leaves us with the task of accurately recreating the geometry of the toys in 3D.
+ All of the properties listed above facilitate a recreation of the original scenes through 3D rendering. We know the pose, location and surface of the objects as well as the location of the camera. We set the material properties of the objects to be a uniform color and diffusely reflective. This leaves us with the task of accurately recreating the geometry of the toys in 3D.
+ 
+ After acquiring and scanning the objects\footnote{We acquired some of the toys by asking the original authors for them with the missing ones located on EBay. %Examples of the toys are shown in figure \ref{fig:norbscans}. 
+We used a high resolution 3D scanner to scan in the objects.  %The scanner is shown in Figure \ref{fig:david}.  
+The models were then cleaned up and uniformly scaled to fit into a unit cube with the bottom center at the origin.  Models setup this way allow for a standard way to rotate the objects and place them so they touch the ground plane.}, we created a matching g-buffer for every image in the training dataset.  
 
-After acquiring and scanning the objects\footnote{We acquired some of the toys by asking the original authors for them with the missing ones located on EBay. Examples of the toys are shown in figure \ref{fig:norbscans}.  We used a high resolution 3D scanner to scan in the objects.  The scanner is shown in Figure \ref{fig:david}.  The models were then cleaned up and uniformly scaled to fit into a unit cube with the bottom center at the origin.  Models setup this way allow for a standard way to rotate the objects and place them so they touch the ground plane.}, we created a matching g-buffer for every image in the training dataset.  
-
-Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the real NORB dataset.  \footnote{Early tests did not have this final processing step, and resulted in lower accuracy test results due to the difference between the formatting of the synthetic training data and the real test data.}
-
-This results in a one-to-one mapping between each image in the synthetic training dataset and image in the real training dataset.  This allows different experiments using the g-buffers to assume that the 3D scenes are identical, ensuring the differences in synthesized output can be directly attributed to shading technique. 
+ Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the real NORB dataset.  \footnote{Early tests did not have this final processing step, and resulted in lower accuracy test results due to the difference between the formatting of the synthetic training data and the real test data.}
+ This results in a one-to-one mapping between each image in the synthetic training dataset and image in the real training dataset.  This allows different experiments using the g-buffers to assume that the 3D scenes are identical, ensuring the differences in synthesized output can be directly attributed to shading technique. 
 It also allows for direct comparison between rendered images and the real images because the images are not just of the same object but are an accurate recreation of each photograph in the original dataset.
 
-The NORB dataset does have its shortcomings. The dataset is black and white, low resolution, and it small in size. While these are drawbacks, it does not prevent us from conducting experiments on rendering methods and comparing them to each other.  The dataset is simple and allows for more controllable experiments.  However, it does make it harder to conclude that a method that works for this dataset will also work for datasets with more complex imagery.
+ The NORB dataset does have its shortcomings. The dataset is black and white, low resolution, and it small in size. While these are drawbacks, it does not prevent us from conducting experiments on rendering methods and comparing them to each other.  The dataset is simple and allows for more controllable experiments.  However, it does make it harder to conclude that a method that works for this dataset will also work for datasets with more complex imagery.
 
-
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\linewidth]{./assets/ToysScannerAndScan.png}
-\caption{Top: Two pictures of NORB Toys on the turntable taken from one of scanner's cameras.\\ Bottom: Results of scan when cleaned and reduced to 65,000 vertices.}
-\label{fig:norbscans}
-\end{figure}
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=0.8\columnwidth]{./assets/david_scanner.JPG}
-\caption{A picture of the scanner setup used to generate 3D models of the physical toys. The turntable used to rotate the toys to get a full 360-degree view is not shown here.}
-\label{fig:david}
-\end{figure}
+%\begin{figure}[h!]
+%\centering
+%\includegraphics[width=0.8\linewidth]{./assets/ToysScannerAndScan.png}
+%\caption{Top: Two pictures of NORB Toys on the turntable taken from one of scanner's cameras.\\ Bottom: Results of scan when cleaned and reduced to 65,000 vertices.}
+%\label{fig:norbscans}
+%\end{figure}
+%
+%\begin{figure}[h!]
+%\centering
+%\includegraphics[width=0.8\columnwidth]{./assets/david_scanner.JPG}
+%\caption{A picture of the scanner setup used to generate 3D models of the physical toys. The turntable used to rotate the toys to get a full 360-degree view is not shown here.}
+%\label{fig:david}
+%\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Shapenet Dataset}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[h!]
+\centering
+\includegraphics[width=0.24\columnwidth]{./assets/piano.jpg}
+\includegraphics[width=0.24\columnwidth]{./assets/mug.jpg}
+\includegraphics[width=0.24\columnwidth]{./assets/car.jpg}
+\includegraphics[width=0.24\columnwidth]{./assets/chair.jpg}
+\caption{A sample of the Shapenet train dataset.}
+\label{fig:SHAPENET}
+\end{figure}
+
+The Shapenet dataset consists of tens of thousands of models. For our tasks, we took a subset of Shapenet, taking 10 different models from 10 categories each. The categories we chose were airplanes, boats, cars, chairs, motorcycles, mugs, pianos, planters, tables, and trains. This provided a wide variety of models that could be identified from many different camera angles. Within each category, we chose a set that featured different colorations and types (dirt bikes and street bikes in motorcycles), but avoided models that deviated too far from the standard object, such as motorcycles with three wheels.
+
+Each Shapenet model was raised to sit on a ground plane, and the $xz$-position was centered. That is, for the set of vertices $V$ in the mesh,
+\begin{align*}\min_{v\in V}v_y &= 0, \sum_{v\in V} v_x = 0, \sum_{v\in V} v_z = 0
+\end{align*}
+The first condition was held so that we could render a ground plane under the object at $y=0$, and the second condition helped eliminate some variability in the images. 
+
+After each model was changed to fit the above conditions, they were then rendered using the Mitsuba renderer. An infinitely large, matte ground plane was created below the objects, and two large, spherical area lights were created above the object to create shadows. In a specific experiment, detailed later, these lights were replaced by a single directional light to create harder shadows. For each model, we used 162 randomly sampled camera angles. The camera angles were chosen such that the elevation angles were between 30 and 70 degrees, and  the azimuth could be any angle (between 0 and 2$\pi$ radians). These bounds and the number of samples were chosen to best match the NORB dataset. The randomization was chosen uniformly, such that if $\zeta_1,\zeta_2\in[0,1]$ are uniformly distributed random numbers, then the elevation angle $\theta$ and azimuth angle $\phi$ are as given:
+\begin{align*}
+\theta = \cos^{-1}\zeta_1, \phi = 2\pi \zeta_2
+\end{align*}
+This follows the formula given by \cite{Pharr:2010:PBR:1854996}. The images were rendered at 96x96, outputting the G-buffer of each image, including the image albedo, normals, occlusion, distance field, and color image data.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -368,7 +377,10 @@ Figure \ref{fig:VGG_DAIGRAM} has more detail.\\
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Training on Real Images}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To establish a target performance level that we can measure our shading methods against, we train our classifier on the NORB dataset. However, we filter out all but one lighting condition for both test and training data.  This reduces the test and training datasets to 4,050 images each.  The synthetic g-buffer set is the same size.  
+To establish a target performance level that we can measure our shading methods against, we train our classifier on the NORB dataset. However, we filter out all but one lighting condition for both test and training data.  This reduces the test and training datasets to 4,050 images each.  The synthetic g-buffer set is the same size.
+
+ We repeat each experiment, training on half of the models in our Shapenet database and testing on the other half of those models. Our findings with the Shapenet dataset were consistent with the NORB dataset, and so the below sections will mainly focus on the results of the NORB dataset.
+
  The goal is to see if any of the classifiers training on synthetic data can achieve similar performance to that of a classifier trained on real data.  See figure \ref{fig:norb-samples} for examples of the NORB images.\\
 
 Training with the reduced photographic dataset yields a 95.01\% accuracy.  This score is achieved by training for 200 epochs without any data augmentation and a learning rate of 5e-5. The only data modifications are image normalization for renderer outputs and converting the g-buffer depth maps to be in the linear range of $[0,1]$.  For the rest of the experiments when we train this classifier, the epoch count remains the same and the training data is not augmented.\\  
@@ -382,15 +394,37 @@ By keeping the training the same across experiments, we isolate any difference i
 \label{tblnonGI}
 \begin{tabular}{|l|r|r|}
 \hline
-\multicolumn{1}{|c|}{\textbf{Input}} & \multicolumn{1}{r|}{\textbf{Accuracy}} & \multicolumn{1}{r|}{\textbf{$\Delta$ vs Real}} \\ \hline
-Albedo Only                          & 46.20\%                                & 48.81 / 48.63\%                                \\
-Learned SH Shading                   & 48.52\%                                & 46.49 / 51.07\%                                \\
-SH Shading + AO                      & 55.80\%                                & 39.21 / 58.73\%                                \\
-2 Bounce (Direct Lighting)           & 55.78\%                                & 39.23 / 58.71\%                                \\
-\textbf{Real Images}                          & \textbf{95.01}\%                                & \textbf{0 / 100.00}\%                                   \\ \hline
-\multicolumn{3}{|c|}{\textbf{Performance Of Basic Rendering Methods}}                                                          \\ \hline
+\multicolumn{1}{|c|}{\textbf{Input}}
+& \multicolumn{1}{r|}{\textbf{Accuracy}}
+& \multicolumn{1}{r|}{\textbf{$\Delta$ vs Real}} \\ \hline
+Albedo Only 				&53.26\%	& 41.75 / 56.06\%	\\
+Learned SH Shading			&53.06\%	& 41.95 / 55.85\%	\\
+SH Shading + AO				&60.89\%    & 34.12 / 64.09\%   \\
+2 Bounce (Direct Lighting)	&66.49\%	& 28.52 / 69.98\%   \\
+\textbf{Real Images}		& \textbf{95.01}\%	& \textbf{0 / 100.00}\%	\\ \hline
+\multicolumn{3}{|c|}{\textbf{Performance Of Basic Rendering Methods}}	\\ \hline
 \end{tabular}
-\caption{Performance of rendering methods that currently possible to do in real-time. Albedo Only is passing in the albedo map (see figure \ref{fig:GBUFFER_ALBEDO}). Learned SH Shading is unshadowed shading. SH Shading + AO is unshadowed shading with AO composited with the result. See section \ref{sec:learned_sh} for more detail. 2 Bounce (Direct Lighting) is a shading plus shadowing that is described in section \ref{sec:2bounce}. $\Delta$ vs Real has two numbers: the left is the difference in accuracy from the best result of each method compared to using real data, and the right is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier.  } 
+
+\caption{Performance of rendering methods that currently possible to do in real-time. Albedo Only is passing in the albedo map (see figure \ref{fig:GBUFFER_ALBEDO}). Learned SH Shading is unshadowed shading. SH Shading + AO is unshadowed shading with AO composited with the result. See section \ref{sec:learned_sh} for more detail. 2 Bounce (Direct Lighting) is a shading plus shadowing that is described in section \ref{sec:2bounce}. $\Delta$ vs Real has two numbers: the left is the difference in accuracy from the best result of each method compared to using real data, and the right is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. Data augmentation was used in all of the above experiments except Real Images.} 
+\end{table}
+
+
+\begin{table}[]
+\centering
+\label{tblnonGI}
+\begin{tabular}{|l|r|r|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Input}}
+& \multicolumn{1}{r|}{\textbf{Accuracy}}
+& \multicolumn{1}{r|}{\textbf{$\Delta$ vs Real}} \\ \hline
+Albedo Only 				&44.44\%	& 37.76 / 54.06\%	\\
+Learned SH Shading			&47.80\%	& 34.4 / 58.15\%	\\
+%SH Shading + AO				&60.89\%    & 34.12 / 64.09\%   \\
+2 Bounce (Direct Lighting)	&70.86\%	& 11.34 / 86.20\%   \\
+\textbf{1024 Sample Renderings}		& \textbf{82.20}\%	& \textbf{0 / 100.00}\%	\\ \hline
+\multicolumn{3}{|c|}{\textbf{Performance Of Basic Rendering Methods}}	\\ \hline
+\end{tabular}
+\caption{Scores using the Shapenet dataset. Data augmentation was not used for the experiments listed above, as the training and test dataset were already aligned during the generation of the dataset.} 
 \end{table}
 
 
@@ -451,20 +485,41 @@ Now that we have seen that an approximate shadow (Ambient Occlusion) helps the c
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table*}[]
 \centering
-
 \begin{tabular}{|l|r|r|r|r|}
 \hline
-\multicolumn{1}{|c|}{\textbf{Input}} & \multicolumn{1}{c|}{\textbf{1 Sample}} & \multicolumn{1}{c|}{\textbf{4 Sample}} & \multicolumn{1}{c|}{\textbf{128 Sample}} & \multicolumn{1}{c|}{\textbf{$\Delta$ vs Real}} \\ \hline
-Mitsuba& 57.21\%                                & 72.89\%                                 & 74.84\%                                   & 20.18/78.77\%                               \\
-Denoised& 71.48\%                                & 73.56\%                                 & N/A                                       & 21.45/77.42\%                                \\
-Single GAN& 72.84\%                                & 77.65\%                                 & 75.26\%                                   & \textbf{17.36/81.73\%}                            \\
-Multiple GAN& 85.23\%                                   & 84.37\%                                 & 87.33\%                                   & \textbf{7.68/91.92\%}                            \\ \hline
-\multicolumn{5}{|c|}{\textbf{Performance of GI Rendered Refined Images}}                                                                                                                                             \\ \hline
+\multicolumn{1}{|c|}{\textbf{Input}}
+& \multicolumn{1}{c|}{\textbf{1 Sample}}
+& \multicolumn{1}{c|}{\textbf{4 Sample}}
+& \multicolumn{1}{c|}{\textbf{128 Sample}}
+& \multicolumn{1}{c|}{\textbf{$\Delta$ vs Real}} \\ \hline
+Mitsuba		& 64.44\%	& 73.13\%	& 74.74\%	& 20.27 / 78.67\% \\
+Denoised	& 71.48\%	& 73.56\%	& N/A 		& 21.45 / 77.42\%	\\
+Single GAN	& 72.84\%	& 77.65\% 	& 75.26\%	& \textbf{17.36 / 81.73\%}	\\
+Multiple GAN& 85.23\%	& 84.37\% 	& 87.33\% 	& \textbf{7.68 / 91.92\%}		\\ \hline
+\multicolumn{5}{|c|}{\textbf{Performance of GI Rendered Refined Images}}	\\ \hline
 \end{tabular}
-\caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs. $\Delta$ vs Real has two numbers. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba).}
+\caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs. $\Delta$ vs Real has two numbers. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba). Data augmentation was used for the Mitsuba experiments. }
 \label{tblallrefined}
 \end{table*}
 
+\begin{table*}[]
+\centering
+\begin{tabular}{|l|r|r|r|}
+\hline
+\multicolumn{1}{|c|}{\textbf{Input}}
+& \multicolumn{1}{c|}{\textbf{10 Sample}}
+& \multicolumn{1}{c|}{\textbf{32 Sample}}
+%& \multicolumn{1}{c|}{\textbf{128 Sample}}
+& \multicolumn{1}{c|}{\textbf{$\Delta$ vs Real}} \\ \hline
+Mitsuba		& 81.88\%	& 81.74\%	& 20.27 / z\% \\
+Denoised	& 78.06\%	& 79.12\%	& 3.08 / 96.25\%	\\
+Single GAN	& 83.48\%	& 83.59\%	& \textbf{-1.39 / 100.69\%}	\\
+Multiple GAN& 86.48\%	& 86.65\% 	& \textbf{-4.30 / 105.41\%}		\\ \hline
+\multicolumn{4}{|c|}{\textbf{Performance of GI Rendered Refined Images}}	\\ \hline
+\end{tabular}
+\caption{Scores using the Shapenet dataset. Data augmentation was not used for the experiments listed above.}
+\label{tblallrefined}
+\end{table*}
 
 \begin{figure}[h!]
 \centering
