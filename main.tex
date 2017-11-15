@@ -30,6 +30,7 @@
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
 
 \newcommand{\tompson}[1]{{\color{green} JT: #1}}
+\newcommand{\herscher}[1]{{\color{blue} SH: #1}}
 
 % Pages are numbered in submission mode, and unnumbered in camera-ready
 \ifcvprfinal\pagestyle{empty}\fi
@@ -370,6 +371,7 @@ The Shapenet dataset consists of tens of thousands of models. For our tasks, we 
 Each Shapenet model was raised to sit on a ground plane, and the $xz$-position was centered. That is, for the set of vertices $V$ in the mesh,
 \begin{align*}\min_{v\in V}v_y &= 0, \sum_{v\in V} v_x = 0, \sum_{v\in V} v_z = 0
 \end{align*}
+\tompson{This equation is a waste of space. Change it to an inline equation.}
 The first condition was held so that we could render a ground plane under the object at $y=0$, and the second condition helped eliminate some variability in the images. \tompson{ehhhhhhhh, this seems obvious. But OK.}
 
 After each model was changed to fit the above conditions, they were then rendered using the Mitsuba renderer. An infinitely large, matte ground plane was created below the objects, and two large, spherical area lights were created above the object to create shadows. In a specific experiment, detailed later, these lights were replaced by a single directional light to create harder shadows. For each model, we used 162 randomly sampled camera angles. The camera angles were chosen such that the elevation angles were between 30 and 70 degrees, and the azimuth could be any angle (between 0 and 2$\pi$ radians). These bounds and the number of samples were chosen to best match the NORB dataset. The randomization was chosen uniformly, such that if $\zeta_1,\zeta_2\in[0,1]$ are uniformly distributed random numbers, then the elevation angle $\theta$ and azimuth angle $\phi$ are as given:
@@ -534,7 +536,7 @@ Multiple GAN& 85.23\%	& 84.37\% 	& 87.33\% 	& \textbf{7.68 / 91.92\%}		\\ \hline
 & \multicolumn{1}{c|}{\textbf{32 Sample}}
 %& \multicolumn{1}{c|}{\textbf{128 Sample}}
 & \multicolumn{1}{c|}{\textbf{$\Delta$ vs Real}} \\ \hline
-Mitsuba		& 81.88\%	& 81.74\%	& 20.27 / z\% \\
+Mitsuba		& 81.68\%	& 82.30\%	& 20.27 / z\% \\
 Denoised	& 78.06\%	& 79.12\%	& 3.08 / 96.25\%	\\
 Single GAN	& 83.48\%	& 83.59\%	& \textbf{-1.39 / 100.69\%}	\\
 Multiple GAN& 86.48\%	& 86.65\% 	& \textbf{-4.30 / 105.41\%}		\\ \hline
