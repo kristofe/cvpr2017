@@ -41,7 +41,7 @@
 \begin{document}
 %%%%%%%%% TITLE
 %\title{Experiments in Deferred Shading for Training Image Classifiers \tompson{I really don't like the title. Lets chat in person.}}
-\title{Beyond Photo Realism For Domain Adaptated Synthetic Data}
+\title{Beyond Photo Realism For Domain Adapted Synthetic Data}
 
 \author{Kristofer Schlachter\\
 NYU\\
@@ -91,8 +91,8 @@ Applying deep learning to supervised computer vision tasks commonly requires lar
 This work explores the effectiveness of various rendering methods, which range from very low to very high computational cost. We compare multiple synthetic rendering methods with the performance obtained using "real" data distribution as an optimal baseline. This is made possible since we annotate an existing image classification dataset (NORB \cite{LeCun:2004:LMG:1896300.1896315}) with pixel aligned geometry labels obtained using a high-quality photometric scanner. We represent the geometry and material information of the RGB scene using a "Geometry Buffer" or "g-buffer", which gives us a standard set of 3D scenes where geometric transformations are frozen in place. By using a g-buffer, we isolate the physical process of shading a surface from the geometric process of geometry pose and projection.  The shading process is also isolates from camera parameters including location, orientation and field of view. This allows us to directly compare different rendering methods and enables us to isolate any performance difference due to shading alone.
 
 Capitalizing on this standard 3D scene representation we setup a number of experiments to compare rendering methods of increasing sophistication and computational cost.  We then measure the benefit of adding certain rendering techniques and see if the computational cost can be justified.  These experiments measure the relative importance of image rendering features. We use a full GI rendering via Mitsuba as the method whose performance we sought to match or surpass.
-We are able to do this by using non-standard rendering techniques that involve using convolutional neural nets to learn shading functions.  This is a form of differentiable rendering where the shading is differentiable. Effectively, we use learned shading to denoise low sample count GI rendering and compared it to high sample count images.  We also explored the refining technique in \cite{DBLP:journals/corr/ShrivastavaPTSW16}, and we extend it to use g-buffers and other performance enhancing modifications.
-
+We are able to do this by using non-standard rendering techniques that involve using convolutional neural nets to learn shading functions.  This is a form of differentiable rendering where the shading is differentiable. Effectively, we use learned shading to denoise low sample count GI rendering and compared it to high sample count images.  We also explore the use of Generative Adversarial Networks to learn shading functions that could render images in unique ways that beat the performance of the most accurate GI output.
+%TODO: MENTION GAN ENSEMBLE
 \subsection{Contributions}
 \begin{enumerate}
 \item We provide a dataset that allows the direct comparison of training on real data versus synthetic by including 3D scans of the objects that are in the photographic dataset.
@@ -105,7 +105,7 @@ We are able to do this by using non-standard rendering techniques that involve u
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-There are many ways to generate images and more than one technique is used in this paper, including using g-buffers as input. Previous papers have used g-buffers to condition a learned generative model for shading. Nalbach et al. \cite{DBLP:journals/corr/NalbachAMSR16} uses a similar model architecture as the denoiser we employ as well as using a g-buffer as input.  The authors use it to learn to approximate screen space shading techniques with a data-driven approach, to see if data driven methods can replicate the standard shading methods used in games.  They also use the Structured Similarity (SSIM) loss which is used in our work. They differ in their approach in that they are optimizing for images looking real to humans and not optimizing the images' utility for training classifiers.
+Previous papers have used g-buffers to condition a learned generative model for shading. Nalbach et al. \cite{DBLP:journals/corr/NalbachAMSR16} uses a similar model architecture as the denoiser we employ as well as using a g-buffer as input.  The authors use it to learn to approximate screen space shading techniques with a data-driven approach, to see if data driven methods can replicate the standard shading methods used in games. They differ in their approach in that they are optimizing for images looking real to humans and not optimizing the images' utility for training classifiers.
 %Loss Functions for Neural Networks for Image Processing 
 %Zhao et al. \cite{DBLP:journals/corr/ZhaoGFK15} discusses the motivation of using Structured Similarity (SSIM) as a loss function for image generators. \tompson{Remove this sentence and just add the \\cite to SSIM above.}
 
@@ -113,17 +113,17 @@ There are many ways to generate images and more than one technique is used in th
 
 There have been recent advances in denoising low sample count images calculated by Global Illumination (GI) based renderers.
 %Spatiotemporal Variance-Guided Filtering: Real-Time Reconstruction for Path-Traced Global Illumination 
-Shied et al. \cite{Schied:2017:SVF:3105762.3105770} denoises low sample count GI images by combining neighboring frames and feeding them into a fixed spatiotemporal filter.  The authors emphasis is on temporal stability, efficient computation and denoising single sample frames in real-time. Their authors do not employ machine learning in their method. 
+Shied et al. \cite{Schied:2017:SVF:3105762.3105770} denoises low sample count GI images by combining neighboring frames and feeding them into a fixed spatio-temporal filter.  The authors emphasis is on temporal stability, efficient computation and denoising single sample frames in real-time. Their authors do not employ machine learning in their method. 
 %Interactive Reconstruction of Monte Carlo Image Sequences using a Recurrent Denoising Autoencoder 
 Chaitanya et al. \cite{Chaitanya:2017:IRM:3072959.3073601} along with 
 %Kernel-Predicting Convolutional Networks for Denoising Monte Carlo Renderings 
 Bako et al. \cite{Bako17} and 
 %A Machine Learning Approach for Filtering Monte Carlo Noise
-Kalantari et al. \cite{Kalantari:2015:MLA:2809654.2766977} all use machine learning to denoise Monte Carlo (GI) renderings for graphics applications.  Our work uses a modified form of the model presented in \cite{Chaitanya:2017:IRM:3072959.3073601} in order to denoise images used for training classifiers with the goal of synthesizing training data faster. Again, you need to contrast this work with the prior art. It need not be that this work is better (for instance you might apply the technique to a different application), but there HAS to be a justification for your work.
+Kalantari et al. \cite{Kalantari:2015:MLA:2809654.2766977} all use machine learning to denoise Monte Carlo (GI) renderings for graphics applications.  Our work uses a modified form of the model presented in \cite{Chaitanya:2017:IRM:3072959.3073601} in order to denoise images used for training classifiers with the goal of synthesizing training data faster. 
 
 Further use of global illumination for training classifiers has been explored.
 %Physically-Based Rendering for Indoor Scene Understanding Using Convolutional Neural Networks 
-Zhang et al. \cite{DBLP:journals/corr/ZhangSYSLJF16} use a custom created large 3D indoor dataset to conduct experiments relating the performance of different renderers and lighting for various machine learning tasks. They learn normal estimation, semantic segmentation, and object boundary detection. They use two types of rendering, a rasterization renderer using OpenGL with direct lighting and what they call "local lighting." Our approach, in contrast, focuses mainly on shading and its effect on training data quality. This also results in a difference in what kind of dataset we use. Ours is optimized to isolate the effect of shading and has a real image test set.
+Zhang et al. \cite{DBLP:journals/corr/ZhangSYSLJF16} use a custom created large 3D indoor dataset to conduct experiments relating the performance of different renderers and lighting for various machine learning tasks, such as normal estimation, semantic segmentation, and object boundary detection. Our approach, in contrast, focuses mainly on shading and its effect on training data quality. 
 
 
 %Model-driven Simulations for Deep Convolutional Neural Networks 
@@ -143,14 +143,15 @@ To learn shading, we used Generative Adversarial Networks (GANs) which were firs
 
 %Wang and Gupta \cite{DBLP:journals/corr/WangG16} used multiple GANs for unsupervised learning on real data, separating structure and style of the image data into two separate GANs and later recombining the results. This method was applied to data retrieval for images and classification performance was not measured.
 
+%RenderGAN: Generating Realistic Labeled Data 
+Learning, partially differentiable renderers was proposed by Sixt et al. \cite{DBLP:journals/corr/SixtWL17}. In their paper they train a differentiable 3D renderer, except their model is scene and application specific. The differentiable rendering model architecture we implemented is not restricted to a specific shading model, geometric input or lighting condition.
+
 %Learning from Simulated and Unsupervised Images through Adversarial Training 
 A GAN based method that uses unlabeled data to refine realistic rendered images was pioneered by
 Shrivastava et al. \cite{DBLP:journals/corr/ShrivastavaPTSW16}. The paper proposes an architecture that takes in rendered images and makes them more realistic by using an adversarial loss to tune a refiner model. We use this paper as a starting point for our GAN experiments; however, we modify many aspects of it to suit our input which is an g-buffer not just an image.
 
 A GAN-based method related to Shrivastava et al. is Bousmalis et al. \cite{Bousmalis2016UnsupervisedPD}. This paper proposes a very similar method, but conditions the input with a noise vector and a depth buffer.  The depth buffer is used to mask out the background so the refiner network can concentrate upon pixels containing the object to be classified.  Our method conditions on more data including normals and albedo and doesn't mask out parts of the image which allows for shadowing to be modeled. We also improve upon these two papers by using an ensemble of trained GAN generative models to boost training data performance.
 
-%RenderGAN: Generating Realistic Labeled Data 
-Learning, partially differentiable renderers was proposed by Sixt et al. \cite{DBLP:journals/corr/SixtWL17}. In their paper they train a differentiable 3D renderer, except their model is scene and application specific. The differentiable rendering model architecture we implemented is not restricted to a specific shading model, geometric input or lighting condition.
 %Unsupervised Domain Adaptation by Backpropagation 
 %Domain adaptation without modifying the dataset itself is discussed by Ganin and Lempitsky \cite{2014arXiv1409.7495G} who modify the gradients of a classifier during learning in order to make the learned model domain invariant.  
 
@@ -165,11 +166,9 @@ Learning, partially differentiable renderers was proposed by Sixt et al. \cite{D
 \subsubsection{G-Buffer}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-A popular approach in In real-time rendering applications is to store the rasterized geometry information into a set of buffers called a Geometry Buffer, or G-Buffer \cite{Saito:1990:CRS:97879.97901}, and then apply screen-space rendering methods to produce the lit scene.
-
-G-Buffers separate the geometric processes such as transformation, projection and depth testing, from physical processes such as shading and texture mapping. This is accomplished by the buffers accumulating the geometry information in the first pass and then lighting each pixel of the output on a second pass (which is linear in both model and lighting complexity).  This is in comparison to a forward renderer which calculates geometry information and performs lighting and shadowing in one pass (with quadratic complexity), followed by and writing the result to the output buffer. This technique of using G-Buffers and screen-space rendering is known as ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.
+G-Buffers \cite{Saito:1990:CRS:97879.97901} separate the geometric processes such as transformation, projection and depth testing, from physical processes such as shading and texture mapping. This is accomplished by the buffers accumulating the geometry information in the first pass and then lighting each pixel of the output on a second pass (which is linear in both model and lighting complexity).  This is in comparison to a forward renderer which calculates geometry information and performs lighting and shadowing in one pass (with quadratic complexity), followed by and writing the result to the output buffer. This technique of using G-Buffers and screen-space rendering is known as ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.
  As an added benefit for this work, the encoding of our geometry state into G-Buffers allows for simplified testing of different shading techniques on the identical 3D scenes.
-In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figure \ref{fig:GBUFFER_ALBEDO}, for examples. We describe how the dataset is produced in \ref{NORB-DATASET}.
+In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figure \ref{fig:GBUFFER_ALBEDO}, for examples. We describe how the datasets are produced in \ref{TrainingData}.
 
 \begin{figure}[h!]
 \centering
@@ -194,25 +193,26 @@ Using Spherical Harmonics for lighting allows for a 9-float representation of a 
 
 An advantage to using Spherical Harmonics for lighting is that you can represent a smooth lighting environment with just 9 floats. This allows us to parameterize a lighting function with far fewer parameters compared to other representations. This has the effect of drastically reducing the search space when trying to learn a parameterized lighting model.
 
-We generate a small neural network that calculates three levels of SH basis functions. The input of the network consists of the surface normal at every pixel, which is conveniently stored in the G-Buffer. The network outputs a shaded image which can be composited with shadowing and albedo.
+We create trainable module that calculates three levels of SH basis functions. The input to the module consists of the surface normal at every pixel, which is conveniently stored in the G-Buffer. The network outputs a shaded image which can be composited with shadowing and albedo.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Ambient Occlusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In an environment with only large area light sources, there exists a simple first order approximation to global illumination called Ambient Occlusion. It is used a form of simplified global illumination because it takes into account only screen-space visible  scene geometry\cite{Miller:1994:EAL:192161.192244}.  Each view-ray from the camera's pixel samples defines a single point on the surface of the scene geometry. The algorithm uses these local screen-space geometry samples to approximate how exposed each surface fragment is incoming ambient light sources by estimating how much of the hemisphere around that point is blocked by nearby surfaces. For lighting conditions that are close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination.
+In an environment with only large area light sources, there exists a simple first order approximation to global illumination called Ambient Occlusion. It is used a form of simplified global illumination because it takes into account only screen-space visible  scene geometry\cite{Miller:1994:EAL:192161.192244}.  Each view-ray from the camera's pixel samples defines a single point on the surface of the scene geometry. The algorithm uses these local screen-space geometry samples to approximate how exposed each surface fragment is incoming ambient light sources by estimating how much of the hemisphere around that point is blocked by nearby surfaces. 
+%For lighting conditions that are close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination.
 %This method fails in scenes and camera positions where light occluding geometry that is not-visible to the camera projection dominate the illumination function \tompson{When else does this fail?}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Global Illumination}\label{mitsuba_section}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (such as real-time rasterization-based renderers).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset is diffuse and there are few surfaces capable of reflecting light onto the objects in the scene. We made this decision to avoid the typical thousands of iterations necessary to get a noise free image\footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
+Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (or limited bounce counts).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset is diffuse and there are few surfaces capable of reflecting light onto the objects in the scene. We made this decision to avoid the typical thousands of iterations necessary to get a noise free image\footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
 
-In order to simulate global illumination in our experiments, we used the open source global illumination renderer, Mitsuba.  It generates high quality images that it creates by solving the rendering equation by bouncing many light rays throughout the 3D scene.  The more samples it takes, the closer to the solution and the more realistic the image becomes, but at the cost of high computation; images rendered by Mitsuba often take many orders of magnitude longer than with rasterization methods such as ones included in OpenGL.  
+%In order to simulate global illumination in our experiments, we used the open source global illumination renderer, Mitsuba.  It generates high quality images that it creates by solving the rendering equation by bouncing many light rays throughout the 3D scene.  The more samples it takes, the closer to the solution and the more realistic the image becomes, but at the cost of high computation; images rendered by Mitsuba often take many orders of magnitude longer than with rasterization methods such as ones included in OpenGL.  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Training Data Creation}
+\section{Training Data Creation}\label{TrainingData}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Direct comparisons between rendering techniques and real images could not be done without creating a dataset that has approximately 1:1 correspondence between domains.  To this end we identified the NYU Object Recognition Benchmark (NORB) dataset \cite{LeCun:2004:LMG:1896300.1896315} as a good starting point. It is small enough to allow for recreation of each photograph with high accuracy in simulation.  A characteristic that makes NORB even more attractive is that the object location, rotation, camera placement and lighting condition are known for every image. Furthermore, each object was modified so that the BRDF of each object was approximately homogeneous across the dataset.
 
@@ -221,7 +221,7 @@ However, the NORB dataset is comprised of grayscale images, which is less-releva
 While this is not sufficient on its own to make conclusions about our learning model on real image data, we use this additional synthetic dataset to validate our grayscale NORB results on a RGB dataset of similar complexity and composition. %TODO: reread this?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{NORB Dataset}\label{NORB-DATASET}
+\subsection{NORB Dataset}\label{NORB-DATASET}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 \centering
@@ -236,12 +236,12 @@ The NORB dataset consists of a set of 50 toys split into a 25 object training se
  All of the properties listed above facilitate a near-perfect recreation of the original scenes through 3D rendering (whereas it would be significantly more complicated to recreate natural outdoor scenes with perfect 1:1 geometry correspondence). We know the pose, location and surface of the objects as well as the location of the camera. We set the material properties based on the paint used for the physical toy models.
  %of the objects to be a uniform color hand-chosen to match the NORB model color and diffusely reflective.
  
-After acquiring the objects, we used the HP 3D Structured Light Scanner Pro S3\cite{HPSCANNER} to scan in the objects. The models were then uniformly scaled to fit into a unit cube with the bottom center at the origin. We then rendered a matching g-buffer for every image in the training dataset.  
+We used the HP 3D Structured Light Scanner Pro S3\cite{HPSCANNER} to scan in the objects. The models were then uniformly scaled to fit into a unit cube with the bottom center at the origin. We then rendered a matching g-buffer for every image in the training dataset.  
 
 Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the source NORB dataset. This creation procedure results in a one-to-one mapping between each image in the synthetic training dataset with the corresponding ``real'' image in the NORB training dataset.
 %As briefly mentioned, the NORB dataset does have its shortcomings when compared to recent deep-learning datasets of significantly larger size. The dataset is black and white, low resolution, has very little visual variety and it small in number of samples. While these are drawbacks, the dataset was generated using a controlled capture environment, which helps us eliminate variables such as bad lighting or background noise when evaluating our learning model. Therefore, we can conduct experiments comparing only rendering variables, such as lighting, rendering methods, and more. These conditions are detailed later.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{ShapeNet Dataset}
+\subsection{ShapeNet Dataset}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h!]
@@ -254,9 +254,9 @@ Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for 
 \label{fig:SHAPENET}
 \end{figure}
 
-The ShapeNet dataset consists of tens of thousands of models. For our tasks, we took a subset of ShapeNet, taking 10 different models from 10 categories each. The dataset size was chosen to match similar popular, small datasets CFAR-10 \cite{Krizhevsky09learningmultiple} and MNIST \cite{726791}. The categories we chose were airplanes, boats, cars, chairs, motorcycles, mugs, pianos, planters, tables, and trains. This provided a wide variety of models that could be identified from many different camera angles. 
+  The ShapeNet dataset consists of tens of thousands of models. For our tasks, we took a subset of ShapeNet, taking 10 different models from 10 categories each. The dataset size was chosen to match similar popular, small datasets CFAR-10 \cite{Krizhevsky09learningmultiple} and MNIST \cite{726791}. The categories we chose were airplanes, boats, cars, chairs, motorcycles, mugs, pianos, planters, tables, and trains. This provided a wide variety of models that could be identified from many different camera angles. 
 
-After each model was changed to fit the above conditions, they were then rendered using the Mitsuba renderer. An infinitely large, matte ground plane was created below the objects, and two large, spherical area lights were created above the object to create shadows. In a specific experiment, detailed later, these lights were replaced by a single directional light to create harder shadows. For each model, we used 162 randomly sampled camera angles. The camera angles were chosen such that the elevation angles were between 30 and 70 degrees, and the azimuth could be any angle (between 0 and 2$\pi$ radians). These bounds and the number of samples were chosen to best match the NORB dataset. The randomization was chosen uniformly, such that if $\zeta_1,\zeta_2\in[0,1]$ are uniformly distributed random numbers, then the elevation angle $\theta$ and azimuth angle $\phi$ are $\theta = \cos^{-1}\zeta_1$, $\phi = 2\pi \zeta_2$. This follows the formula given by \cite{Pharr:2010:PBR:1854996}. The images were rendered at 96x96, outputting the G-buffer of each image, including the image albedo, normals, occlusion, distance field, and color image data.
+After each model was changed to fit the above conditions, they were then rendered using the Mitsuba renderer. An infinitely large, matte ground plane was created below the objects, and two large, spherical area lights were created above the object to create shadows. In a specific experiment, detailed later, these lights were replaced by a single directional light to create harder shadows. For each model, we used 162 randomly sampled camera angles. The camera angles were chosen such that the elevation angles were between 30 and 70 degrees, and the azimuth could be any angle (between 0 and 2$\pi$ radians). These bounds and the number of samples were chosen to best match the NORB dataset. The randomization was chosen uniformly, such that if $\zeta_1\in[\cos(70^\circ),\cos(30^\circ)],\zeta_2\in[0,1]$ are uniformly distributed random numbers, then the elevation angle $\theta$ and azimuth angle $\phi$ are $\theta = \cos^{-1}\zeta_1$, $\phi = 2\pi \zeta_2$. This follows the formula given by \cite{Pharr:2010:PBR:1854996}. The images were rendered at 96x96, outputting the G-buffer of each image, including the image albedo, normals, occlusion, distance field, and color image data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
