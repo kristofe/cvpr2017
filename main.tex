@@ -88,29 +88,17 @@ As synthetic imagery is used more frequently in training deep models, it is impo
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Applying deep learning to supervised computer vision tasks commonly requires large labeled datasets \cite{imagenet, coco}, which can be time consuming, expensive or impractical to collect. As a result, increasingly more synthetic data has been used to overcome these scalability limitations \cite{DBLP:journals/corr/RichterVRK16, DBLP:journals/corr/ShafaeiLS16, DBLP:journals/corr/ZhangSYSLJF16, DBLP:journals/corr/SixtWL17}. However, using synthetic data can introduce problems that arise from the differences in the distributions of the real and synthesized data \cite{2014arXiv1409.7495G}. Usually the best way to reduce the differences is to use the most realistic simulation method available for synthesizing images, in this case a Global Illumination (GI) based renderer \edit{such as Mitsuba\cite{Mitsuba}.}  Unfortunately, the computational cost of most GI renderers can be prohibitive.  Recently, there has been research into boosting the effectiveness of existing synthetic data\cite{DBLP:journals/corr/ShrivastavaPTSW16}.  However, these new techniques were not benchmarked against real RGB data or against other rendering techniques.
+Applying deep learning to supervised computer vision tasks commonly requires large labeled datasets \cite{imagenet, coco}, which can be time consuming, expensive or impractical to collect. As a result, increasingly more synthetic data has been used to overcome these scalability limitations \cite{DBLP:journals/corr/RichterVRK16, DBLP:journals/corr/ShafaeiLS16, DBLP:journals/corr/ZhangSYSLJF16, DBLP:journals/corr/SixtWL17}. However, using synthetic data can introduce problems that arise from the differences in the distributions of the real and synthesized data \cite{2014arXiv1409.7495G}. Usually the best way to reduce the differences is to use the most realistic simulation method available for synthesizing images, in this case a Global Illumination (GI) based renderer such as Mitsuba\cite{Mitsuba}.  Unfortunately, the computational cost of most GI renderers can be prohibitive.  Recently, there has been research into boosting the effectiveness of existing synthetic data\cite{DBLP:journals/corr/ShrivastavaPTSW16}.  However, these new techniques were not benchmarked against real RGB data or against other rendering techniques.
 
-This work explores the effectiveness of various rendering methods, which range from very low to very high computational cost. \edit{We compare multiple synthetic rendering methods with the performance obtained using "real" data distribution as an optimal baseline. This is made possible since we annotate an existing image classification dataset (NORB \cite{LeCun:2004:LMG:1896300.1896315}) with pixel aligned geometry labels obtained using a high-quality photometric scanner. We represent the geometry and material information of the RGB scene using a "Geometry Buffer" or "g-buffer", which gives us a standard set of 3D scenes where geometric transformations are frozen in place. By using a g-buffer, we isolate the physical process of shading a surface from the geometric process of geometry pose and projection.  The shading process is also isolates from camera parameters including location, orientation and field of view. This allows us to directly compare different rendering methods and enables us to isolate any performance difference due to shading alone. }
-%Furthermore, not only do we compare the performance among the synthetic techniques, we also compare against using real data for training \tompson{This last sentence is a bit of an overreach. Almost all domain adaptation papers evaluate cross domain. Just say something like: "we compare multiple synthetic rendering methods with the performance obtained using the ``real'' data distribution as an optimal baseline}. 
+This work explores the effectiveness of various rendering methods, which range from very low to very high computational cost. We compare multiple synthetic rendering methods with the performance obtained using "real" data distribution as an optimal baseline. This is made possible since we annotate an existing image classification dataset (NORB \cite{LeCun:2004:LMG:1896300.1896315}) with pixel aligned geometry labels obtained using a high-quality photometric scanner. We represent the geometry and material information of the RGB scene using a "Geometry Buffer" or "g-buffer", which gives us a standard set of 3D scenes where geometric transformations are frozen in place. By using a g-buffer, we isolate the physical process of shading a surface from the geometric process of geometry pose and projection.  The shading process is also isolates from camera parameters including location, orientation and field of view. This allows us to directly compare different rendering methods and enables us to isolate any performance difference due to shading alone.
 
-%This is made possible, since we extend an existing dataset by rendering each scene to a Geometry Buffer (g-buffer)\tompson{Huh? No, this doesn't make sense. You've created a dataset with 1:1 correspondence between RGB and synthetic geometry (up to the precision of your scanning technique). Mentioning g-buffer here confuses things IMO. If you really must mention the ``g-buffer'', you could say something like (and this needs work): "This is made possible since we annotate an existing RGB image classification dataset(cite norb) with pixel aligned geometry labels obtained using a high-quality photometric scanner (is it photometic?).
-%We represent the geometry and material information of the RGB scene using a ``geometry-buffer"...}, \footnote{A g-buffer is the first step in a two step process called deferred shading. The second step is the actual shading of the geometry stored in the g-buffer.} which gives us a standard set of 3D scenes where geometric transformations are frozen in place.
-
-%which is a rendering of a scene that freezes the objects in the scene and puts the 3D information describing the scene from a given state of the camera, geometry and materials into a set of buffers.  You can then use those g-buffers that correspond to the original dataset and shade them in a separate step. 
-%This two step process of rendering geometry and material information to a g-buffer and then in second step shading the scene to produce the final image is called deferred shading.  
-
-%By using a g-buffer, we have isolated the physical process of shading a surface from the geometric process of geometry pose and projection.  The shading process is also isolated from camera parameters including location, orientation and field of view. This allowed us to directly compare different rendering methods and enabled us to isolate any performance difference due to shading alone.
-
-%\tompson{I like some of the content in the last commented sentence. Consider putting some of it in.... since many CV people wont know why this representation is important or useful.}
-
-Capitalizing on this standard 3D scene representation we setup a number of experiments to compare rendering methods of increasing sophistication and computational cost.  We then measure the benefit of adding certain rendering techniques and see if the computational cost can be justified.  These experiments measure the relative importance of image rendering features. We use a full GI 128 sample rendering via Mitsuba as the method whose performance we sought to match or surpass. %\tompson{TODO: cite the renderer.}. 
+Capitalizing on this standard 3D scene representation we setup a number of experiments to compare rendering methods of increasing sophistication and computational cost.  We then measure the benefit of adding certain rendering techniques and see if the computational cost can be justified.  These experiments measure the relative importance of image rendering features. We use a full GI 128 sample rendering via Mitsuba as the method whose performance we sought to match or surpass.
 We are able to do this by using non-standard rendering techniques that involve using convolutional neural nets to learn shading functions.  This is a form of differentiable rendering where the shading is differentiable. Effectively, we use learned shading to denoise low sample count GI rendering and compared it to high sample count images.  We also explored the refining technique in \cite{DBLP:journals/corr/ShrivastavaPTSW16}, and we extend it to use g-buffers and other performance enhancing modifications.
 
 \subsection{Contributions}
 \begin{enumerate}
 \item We provide a dataset that allows the direct comparison of training on real data versus synthetic by including 3D scans of the objects that are in the photographic dataset.
-%\item We create multiple partially differentiable renderers \tompson{why partially? Because you don't differentiate w.r.t. all latent parameters. Pointing this out sort of weakens the contribution... Consider removing "partial" or call it a "differentiable shading function" or something... The other problem is that this is a multivariable input. All derivatives are "partial", but this is not what you mean so you're confusing your readers. Note: this wording is also in later sections.} that can learn shading functions.
-\item We introduce a novel method of using \edit{an ensemble of} GAN trained generative models to create an augmented dataset. \tompson{This is the first time you're mentioning GANs. A) You're using a term before you define it (Generative-Adversarial-Network), B) more importantly, you should give a 2 sentence summary of the GAN ensemble above this list of contributions. The word ENSEMBLE absolutely must be present in this contribution list.}
+\item We introduce a novel method of using an ensemble of GAN trained generative models to create an augmented dataset.
 \item We contribute a thorough comparison of the performance of all the rendering methods with real data.
 \end{enumerate}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -119,8 +107,7 @@ We are able to do this by using non-standard rendering techniques that involve u
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-There are many ways to generate images and more than one technique is used in this paper, including using g-buffers as input. Previous papers have used g-buffers to condition a learned generative model for shading. Nalbach et al. \cite{DBLP:journals/corr/NalbachAMSR16} uses a similar model architecture as the denoiser we employ as well as using a g-buffer as input.  The authors use it to learn to approximate screen space shading techniques with a data-driven approach, to see if data driven methods can replicate the standard shading methods used in games.  They also use the Structured Similarity (SSIM) loss which is used in our work. \tompson{OK, but what's wrong with their approach or how is your different? ANY reason would suffice.}.
-\edit{They differ in their approach in that they are optimizing for images looking real to humans and not optimizing the images' utility for training classifiers.} 
+There are many ways to generate images and more than one technique is used in this paper, including using g-buffers as input. Previous papers have used g-buffers to condition a learned generative model for shading. Nalbach et al. \cite{DBLP:journals/corr/NalbachAMSR16} uses a similar model architecture as the denoiser we employ as well as using a g-buffer as input.  The authors use it to learn to approximate screen space shading techniques with a data-driven approach, to see if data driven methods can replicate the standard shading methods used in games.  They also use the Structured Similarity (SSIM) loss which is used in our work. They differ in their approach in that they are optimizing for images looking real to humans and not optimizing the images' utility for training classifiers.
 %Loss Functions for Neural Networks for Image Processing 
 %Zhao et al. \cite{DBLP:journals/corr/ZhaoGFK15} discusses the motivation of using Structured Similarity (SSIM) as a loss function for image generators. \tompson{Remove this sentence and just add the \\cite to SSIM above.}
 
@@ -134,60 +121,47 @@ Chaitanya et al. \cite{Chaitanya:2017:IRM:3072959.3073601} along with
 %Kernel-Predicting Convolutional Networks for Denoising Monte Carlo Renderings 
 Bako et al. \cite{Bako17} and 
 %A Machine Learning Approach for Filtering Monte Carlo Noise
-Kalantari et al. \cite{Kalantari:2015:MLA:2809654.2766977} all use machine learning to denoise Monte Carlo (GI) renderings for graphics applications.  Our work uses a modified form of the model presented in \cite{Chaitanya:2017:IRM:3072959.3073601} \edit{in order to denoise images used for training classifiers with the goal of synthesizing training data faster.} \tompson{\textit{in order to improve bla bla bla}. Again, you need to contrast this work with the prior art. It need not be that this work is better (for instance you might apply the technique to a different application), but there HAS to be a justification for your work.}.
+Kalantari et al. \cite{Kalantari:2015:MLA:2809654.2766977} all use machine learning to denoise Monte Carlo (GI) renderings for graphics applications.  Our work uses a modified form of the model presented in \cite{Chaitanya:2017:IRM:3072959.3073601} in order to denoise images used for training classifiers with the goal of synthesizing training data faster. Again, you need to contrast this work with the prior art. It need not be that this work is better (for instance you might apply the technique to a different application), but there HAS to be a justification for your work.
 
 Further use of global illumination for training classifiers has been explored.
 %Physically-Based Rendering for Indoor Scene Understanding Using Convolutional Neural Networks 
-Zhang et al. \cite{DBLP:journals/corr/ZhangSYSLJF16} use a custom created large 3D indoor dataset to conduct experiments relating the performance of different renderers and lighting for various machine learning tasks. They learn normal estimation, semantic segmentation, and object boundary detection. They use two types of rendering, a rasterization renderer using OpenGL with direct lighting and what they call "local lighting." \edit{Our approach, in contrast, focuses mainly on shading and its effect on training data quality. This also results in a difference in what kind of dataset we use. Ours is optimized to isolate the effect of shading and has a real image test set.}
-% Local lighting, as described in their paper, is placing many lights into the environment but only use the closest 8 lights for direct lighting computation.  Both OpenGL methods do not include any GI or shadowing. They have two lighting conditions for their GI based rendering,  indirect light coming from through windows and local light coming from emissive objects within the scene.  They compare their results with a real dataset and use the real dataset to fine-tune their training. The only conclusions they can draw from their experiments are that more realistic data is better and that using a GI based renderer provides the results for synthetic data. \tompson{This is way too much content for this citation. Cut it back to 3 sentences at the most (and again contrast your method to theirs).}
+Zhang et al. \cite{DBLP:journals/corr/ZhangSYSLJF16} use a custom created large 3D indoor dataset to conduct experiments relating the performance of different renderers and lighting for various machine learning tasks. They learn normal estimation, semantic segmentation, and object boundary detection. They use two types of rendering, a rasterization renderer using OpenGL with direct lighting and what they call "local lighting." Our approach, in contrast, focuses mainly on shading and its effect on training data quality. This also results in a difference in what kind of dataset we use. Ours is optimized to isolate the effect of shading and has a real image test set.
 
 
 %Model-driven Simulations for Deep Convolutional Neural Networks 
-Veeravasarapu et al. \cite{DBLP:journals/corr/VeeravasarapuRR16} discuss Monte Carlo methods for generating synthetic data, and they examine several different simulated datasets. They tested various different levels of fidelity (measured in samples-per-pixel) and concluded that beyond a certain threshold (40 spp for their specific scenes), increases in rendering fidelity do not increase the data training accuracy. \edit{We build upon this result by using learning-based methods to improve the accuracy of visual fidelity for lower sample counts. }\tompson{I don't know the work so I can't add concrete suggestion but you might want to say: "However, they do not use learning-based methods to improve the accuracy of visual fidelity for low sample counts as in this work..." or something}
+Veeravasarapu et al. \cite{DBLP:journals/corr/VeeravasarapuRR16} discuss Monte Carlo methods for generating synthetic data, and they examine several different simulated datasets. They tested various different levels of fidelity (measured in samples-per-pixel) and concluded that beyond a certain threshold (40 spp for their specific scenes), increases in rendering fidelity do not increase the data training accuracy. We build upon this result by using learning-based methods to improve the accuracy of visual fidelity for lower sample counts.
 
 % How useful is photo-realistic rendering for visual learning? 
-Movshovitz-Attias et al. \cite{DBLP:journals/corr/Movshovitz-Attias16} \edit{\sout{tested synthetic data for training combined with real data for viewpoint estimation. Their paper}} demonstrated that synthetic data produced by a high-quality renderer, when added to a dataset of natural images, can produce training accuracies that are competitive with a larger dataset of real data. Their work focused on rendering parameters, such as lighting positions, background, and camera shutter speed. \sout{They accounted for any performance shortfall in their synthetic data versus real as due to the difference between the domains in their datasets.}  \edit{As opposed to these variables, our work focuses on different methods of rendering light interaction and propagation.}
-\sout{
-We designed our dataset so you could not use that argument. The part of the rendering process that they varied was the material which is something we hold constant \tompson{confusing sentence, consider re-wording}. This makes their work complementary due to our focus on light interaction and propagation.
-}
+Movshovitz-Attias et al. \cite{DBLP:journals/corr/Movshovitz-Attias16} demonstrated that synthetic data produced by a high-quality renderer, when added to a dataset of natural images, can produce training accuracies that are competitive with a larger dataset of real data. Their work focused on rendering parameters, such as lighting positions, background, and camera shutter speed. As opposed to these variables, our work focuses on different methods of rendering light interaction and propagation.
 
 %Playing for Data: Ground Truth from Computer Games
 %Play and Learn: Using Video Games to Train Computer Vision Model 
-Using a video game engine for dataset creation has been explored by Richter et al. \cite{DBLP:journals/corr/RichterVRK16} and  Shafaei et al. \cite{DBLP:journals/corr/ShafaeiLS16}. They explored the use of video game snapshots to show that it could train image segmentation models. %While we sought to answer the question of classification over segmentation, 
-\sout{This paper did provide interesting insights into the use of data that was rendered at real time for computer vision training problems.} \edit{We built upon their approach by using learned rendering techniques to improve the synthesis quality and to decrease rendering computational cost.} \tompson{Hmmmm... careful here. Segmentation IS pixel classification. They're not dissimilar problems. Did this paper try to improve the data efficiency of the synthetic data (by learning a GAN to improve performance)? If not, use that as the comparison point.}
+Using a video game engine for dataset creation has been explored by Richter et al. \cite{DBLP:journals/corr/RichterVRK16} and  Shafaei et al. \cite{DBLP:journals/corr/ShafaeiLS16}. They explored the use of video game snapshots to show that it could train image segmentation models. We built upon their approach by using learned rendering techniques to improve the synthesis quality and to decrease rendering computational cost.
 
 %Conditional Image Synthesis with Auxiliary Classifier GANs \cite{DBLP:journals/corr/OdenaOS16} uses label data to improve the results of GANs.  They also use SSIM as a way to measure their results which we attempt to do as well.
 
 %Generative Image Modeling using Style and Structure Adversarial Networks 
 To learn shading, we used Generative Adversarial Networks(GAN) which were first introduced by Goodfellow et al. \cite{goodfellow}. Since then many works have used them to synthesize images. 
+
 %Wang and Gupta \cite{DBLP:journals/corr/WangG16} used multiple GANs for unsupervised learning on real data, separating structure and style of the image data into two separate GANs and later recombining the results. This method was applied to data retrieval for images and classification performance was not measured.
 
 %Learning from Simulated and Unsupervised Images through Adversarial Training 
 A GAN based method that uses unlabeled data to refine realistic rendered images was pioneered by
-Shrivastava et al. \cite{DBLP:journals/corr/ShrivastavaPTSW16}. The paper proposes an architecture that takes in rendered images and makes them more realistic by using an adversarial loss to tune a refiner model. We use this paper as a starting point for our GAN experiments.  %An issue with their approach that we address is that they don't have a principled way of telling when to stop the learning of a refiner and thus require a human to decide that an image ``looks real.''; what might be most realistic to a human may not maximize the utility in training a classifier. but we address the difficulty of comparing the relative effectiveness of various methods, and with additional comparisons against ``real'' data.   We also address the method of choosing the best GAN to use for the final refiner.  
-\edit{However we modify many aspects of it to suit our input which is an g-buffer not just an image.}
+Shrivastava et al. \cite{DBLP:journals/corr/ShrivastavaPTSW16}. The paper proposes an architecture that takes in rendered images and makes them more realistic by using an adversarial loss to tune a refiner model. We use this paper as a starting point for our GAN experiments; however, we modify many aspects of it to suit our input which is an g-buffer not just an image.
 
-\edit{A GAN-based method related to Shrivastava et al. is Bousmalis et al. \cite{Bousmalis2016UnsupervisedPD}. This paper proposes a very similar method, but conditions the input with a noise vector and a depth buffer.  The depth buffer is used to mask out the background so the refiner network concentrates upon the object to be classified.  Our method conditions on more data including normals and albedo and doesn't mask out parts of the image which allows for shadowing to modeled. We also improve upon these two papers by using an ensemble of trained GAN generative models to boost training data efficacy.}
+A GAN-based method related to Shrivastava et al. is Bousmalis et al. \cite{Bousmalis2016UnsupervisedPD}. This paper proposes a very similar method, but conditions the input with a noise vector and a depth buffer.  The depth buffer is used to mask out the background so the refiner network concentrates upon the object to be classified.  Our method conditions on more data including normals and albedo and doesn't mask out parts of the image which allows for shadowing to modeled. We also improve upon these two papers by using an ensemble of trained GAN generative models to boost training data efficacy.
 
 %RenderGAN: Generating Realistic Labeled Data 
-Learning, partially differentiable renderers was proposed by Sixt et al. \cite{DBLP:journals/corr/SixtWL17}. In their paper they train a differentiable 3D renderer, except their model is scene and application specific. 
-\sout{Their model is restricted to learning a rendering of a specific single geometric tag that can be approximated by a circle. This can be done because geometric transformations seem to happen in plane and can be thought of as 2D.  Also, their lighting is approximated by a 2D gradient, and they learn hand picked application-specific features such as blurriness, background and detail.  In the end their methods are narrowly applicable to the images they are trying to approximate and do not generalize to a full 3D renderer.}
-\edit{ The differentiable rendering model architecture we implemented is not restricted to a specific shading model, geometric input or lighting condition.}
+Learning, partially differentiable renderers was proposed by Sixt et al. \cite{DBLP:journals/corr/SixtWL17}. In their paper they train a differentiable 3D renderer, except their model is scene and application specific. The differentiable rendering model architecture we implemented is not restricted to a specific shading model, geometric input or lighting condition.
 %Unsupervised Domain Adaptation by Backpropagation 
 %Domain adaptation without modifying the dataset itself is discussed by Ganin and Lempitsky \cite{2014arXiv1409.7495G} who modify the gradients of a classifier during learning in order to make the learned model domain invariant.  
 
 %Generative Adversarial Nets \cite{2014arXiv1406.2661G}\\
 %Learning Methods for Generic Object Recognition with Invariance to Pose and Lighting \cite{LeCun:2004:LMG:1896300.1896315}\\
 
-\tompson{Yet, I agree with you. This section is too long. Cut it down to 2 or 3 sentences per paper and make sure you add contrastive statements.}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{\edit{Rendering Methods and Techniques}Graphics and Rendering Background}
+\subsection{Rendering Methods and Techniques}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-In our experiments, we use some rendering techniques that require some background.  The first is a geometry buffer (G-Buffer).
-
-\tompson{I'm not a huge fan of the subsection heading. It implies the reader is not familiar. Suggestion: "Rendering Methods and Techniques" then just remove the 2 sentences and get straight into g-buffer.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{G-Buffer}
@@ -195,20 +169,16 @@ In our experiments, we use some rendering techniques that require some backgroun
 
 A popular approach in In real-time rendering applications is to store the rasterized geometry information into a set of buffers called a Geometry Buffer, or G-Buffer \cite{Saito:1990:CRS:97879.97901}, and then apply screen-space rendering methods to produce the lit scene.
 
-G-Buffers separate the geometric processes such as transformation, projection and depth testing, from physical processes such as shading and texture mapping. This is accomplished by the buffers accumulating the geometry information in the first pass and then lighting each pixel of the output on a second pass (which is linear in both model and lighting complexity).  This is in comparison to a forward renderer which calculates geometry information and performs lighting and shadowing in one pass (with quadratic complexity), followed by and writing the result to the output buffer.  
-%The inefficiency that the G-Buffer addresses is that the information can then be replaced by an object that is drawn later in the stream.  Pixels can be overdrawn many many times which can cause a lot of wasted lighting computation. 
-This technique of using G-Buffers and screen-space rendering is known as ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.
+G-Buffers separate the geometric processes such as transformation, projection and depth testing, from physical processes such as shading and texture mapping. This is accomplished by the buffers accumulating the geometry information in the first pass and then lighting each pixel of the output on a second pass (which is linear in both model and lighting complexity).  This is in comparison to a forward renderer which calculates geometry information and performs lighting and shadowing in one pass (with quadratic complexity), followed by and writing the result to the output buffer. This technique of using G-Buffers and screen-space rendering is known as ``deferred shading,'' where expensive lighting and shadowing computation is done after all of the visible geometry is encoded into its buffers.
  As an added benefit for this work, the encoding of our geometry state into G-Buffers allows for simplified testing of different shading techniques on the identical 3D scenes.
-In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figure \ref{fig:GBUFFER_ALBEDO}, for examples. \edit{We describe how the dataset is produced in \ref{NORB-DATASET}}.
+In our experiments, our G-Buffer consists of the scene encoded geometry normals, geometry diffuse color (also referred to as albedo), and the linear depth from the camera to the visible geometry.  See figure \ref{fig:GBUFFER_ALBEDO}, for examples. We describe how the dataset is produced in \ref{NORB-DATASET}.
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=0.8\columnwidth]{./assets/synth_gbuffer_framed.png}
-\caption{G-Buffer. Top is Albedo, Middle is depth (Contrast was adjusted for display), Bottom is world space normals. \tompson{Just one column for this figure.}}
-\label{fig:GBUFFER_ALBEDO}
+\includegraphics[width=0.8\columnwidth]{./assets/gbuffer-onerow.png}
+\caption{G-Buffer. Left is Albedo, middle is Depth, right is world space Normals.}
+\label{fig:GBUFFER_ALBEDO} 
 \end{figure}
-
-\tompson{TODO: Describe how you capture the G-Buffer here. Or mention that you will describe how the dataset is produced later.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Spherical Harmonics}
@@ -219,127 +189,42 @@ In our experiments, our G-Buffer consists of the scene encoded geometry normals,
 \caption{Visualization of first 3 bands of the spherical harmonics functions. Red are negative values and blue are positive. These are the corresponding 9 functions to the 9 coefficients we learn for lighting.}
 \label{fig:SHBands01}
 \end{figure}
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[width=0.8\columnwidth]{./assets/SHOneBandNoCaption.pdf}
-%\caption{Visualization of lighting function using [RIGHT] a lit sphere  and [LEFT] lobes. \cite{G03}}
-%\label{fig:SHBands02}
-%\end{figure}
-In our experiments, we use a set of functions called Spherical Harmonics (SH) to learn the lighting of an environment. Spherical Harmonics are a set of \edit{continuous and rotationally invariant} functions that approximate an arbitrary spherical function, such as the distribution of incoming or outgoing light \cite{Ramamoorthi:2001:ERI:383259.383317} \tompson{BRDF?}. \edit{The orthogonal functions are grouped into levels of increasing detail, resolution, or frequency.} SH are grouped into levels, where each level is a set of orthogonal functions of finer detail, resolution, or frequency \cite{Shreiner:2013:OPG:2544032}.  To represent the smooth lighting in our experiments, we only need the first three levels which are a constant, linear polynomials, and quadratic polynomials of the surface normal. See Figure \ref{fig:SHBands01} for a visualization of the first three levels.% and see Figure \ref{fig:SHBands02} to see a visualization of a diffuse lighting function.\\
 
-\edit{Using Spherical Harmonics for lighting allows for a 9-float representation of a smooth lighting environment. We use SH to represent complex lighting models in a compressed form, which has the effect of drastically reducing the search space when trying to learn a parameterized lighting model.}
+In our experiments, we use a set of functions called Spherical Harmonics (SH) to learn the lighting of an environment. Spherical Harmonics are a set of continuous and rotationally invariant functions that approximate an arbitrary spherical function, such as the distribution of light reflected off of a surface \cite{Ramamoorthi:2001:ERI:383259.383317}, also known as a bidirectional reflectance distribution function (BRDF). The orthogonal functions are grouped into levels of increasing detail, resolution, or frequency. SH are grouped into levels, where each level is a set of orthogonal functions of finer detail, resolution, or frequency \cite{Shreiner:2013:OPG:2544032}.  To represent the smooth lighting in our experiments, we only need the first three levels which are a constant, linear polynomials, and quadratic polynomials of the surface normal. See Figure \ref{fig:SHBands01} for a visualization of the first three levels.
 
-An advantage to using spherical harmonics for lighting is that you can represent a smooth lighting environment with just 9 floats. This allows us to parameterize a lighting function with far fewer parameters compared to other representations\footnote{Image Based Lighting for instance. It requires 6 images!} \tompson{This is a confusing point. A simple lighting model: diffuse shading with a single directional light source: it has 3 parameters. I think you mean to say you can represent complex lighting models with a compressed representation or something, but for sure you'll need to clarify because it wont be clear to the reviewers}. This has the effect of drastically reducing the search space when trying to learn a parameterized lighting model.
+Using Spherical Harmonics for lighting allows for a 9-float representation of a smooth lighting environment. We use SH to represent complex lighting models in a compressed form, which has the effect of drastically reducing the search space when trying to learn a parameterized lighting model.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%\subsubsection{Spherical Harmonics Network}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+An advantage to using Spherical Harmonics for lighting is that you can represent a smooth lighting environment with just 9 floats. This allows us to parameterize a lighting function with far fewer parameters compared to other representations. This has the effect of drastically reducing the search space when trying to learn a parameterized lighting model.
 
-\edit{We generate a small neural network that calculates three levels of SH basis functions. The input of the network consists of the surface normal at every pixel, which is conveniently stored in the G-Buffer. The network outputs a shaded image which can be composited with shadowing and albedo.}
-
-%\tompson{Remove this subsection and merge this content into the last one.}
-
-%We used this representational advantage in our experiments by creating a pyTorch \cite{PYTORCH} module \tompson{Don`t mention pytorch... The framework choice is an implementation detail that can go in the experimental section.} that calculates three levels of the spherical harmonics basis functions.  These functions were parameterized by 9 floats.  The input to the network is the surface normal at every pixel, which is conveniently stored in the normal buffer part of the g-buffer. The normal buffer is input into the SH module which outputs a shaded image that can be composited with shadowing and albedo. \tompson{A figure here is a must (placeholder added).}
+We generate a small neural network that calculates three levels of SH basis functions. The input of the network consists of the surface normal at every pixel, which is conveniently stored in the G-Buffer. The network outputs a shaded image which can be composited with shadowing and albedo.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Ambient Occlusion}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\edit{In an environment with only large area light sources, there exists a}
-
-%Given that we are only allowing smoothly changing lighting \tompson{Be more precise. What do you mean by smooth? Smoothness in a ML sense means imposing p-norm constraints / regularization terms over time or space... It has specific meaning to this community. So what do you mean by smoothly changing? Also, this is the first time you're mentioning any restrictions in what you allow... Consider rephrasing}, there is a very 
-simple first order approximation to global illumination called Ambient Occlusion. It is used a form of simplified global illumination because it takes into account only screen-space visible  scene geometry\cite{Miller:1994:EAL:192161.192244}.  Each view-ray from the camera's pixel samples defines a single point on the surface of the scene geometry. The algorithm uses these local screen-space geometry samples to approximate how exposed each surface fragment is incoming ambient light sources by estimating how much of the hemisphere around that point is blocked by nearby surfaces. For lighting conditions that are close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination. This method fails in scenes and camera positions where light occluding geometry that is not-visible to the camera projection dominate the illumination function \tompson{When else does this fail?}.   \\%\footnote{See Figure~\ref{fig:AO1} to see how it effects an object if it were rendered in an unoccluded space. The animal's body geometry demonstrates self-occlusion, whereas the ground shows how other objects block incoming ambient light.}.\\
-%We use this method in our experiments to see how good an approximation it is for global illumination.  As far as our experiments show it isn't very good compared to a full GI renderer.  %TODO: Where is the result of the experiment (Training with AO)?
-
-
-%This information is used in realtime 3D engines to help make the shading more realistic, while being significantly faster to compute than true global illumination.  It is usually computed offline for static scenes, but can also be approximated in screen space using the depth information encoded into the G-Buffer.
-%
-%\begin{figure}
-%\centering
-%\begin{subfigure}{.5\columnwidth}
-%  \centering
-%  \includegraphics[width=0.8\linewidth]{./assets/AO_DiffuseOnly.jpg}
-%  \label{fig:AO1_diffuse}
-%\end{subfigure}%
-%\begin{subfigure}{.5\columnwidth}
-%  \centering
-%  \includegraphics[width=0.8\linewidth]{./assets/AO_FullAO.jpg}
-%  \label{fig:AO1_fullao}
-%\end{subfigure}
-%\caption{[LEFT] Diffuse Shading, [RIGHT] Ambient Occlusion and Diffuse Shading }
-%\label{fig:AO1}
-%\end{figure}
-
-\begin{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{VGG08 Batch Norm Classifier Architecture}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-The classifier model architecture is a VGG08 model with batch normalization and 100 output features. This model can be thought of two connected parts, a feature learner and classifier.  The feature learner is the 5 layers of convolutions and the classifier is the 3 fully connected linear layers.\\  
-In more detail the architecture is for the feature learner: 
-\begin{enumerate}
-\item 64 x Conv2D(3x3) - BatchNorm - ReLU - Max Pool
-\item 128 x Conv2D(3x3) - BatchNorm - ReLU - Max Pool
-\item 256 x Conv2D(3x3) - BatchNorm - ReLU - Max Pool
-\item 512 x Conv2D(3x3) - BatchNorm - ReLU - Max Pool
-\item 512 x Conv2D(3x3) - BatchNorm - ReLU - Max Pool
-\end{enumerate}
-The features (512x3x3) are then fed into a classifier of architecture: 
-\begin{itemize}
-\item Linear (in: 512x3x3, out: 100) - ReLU - Dropout
-\item Linear(100,100) - BatchNorm - Dropout
-\item Linear(100, 5)
-\item LogSoftmax
-\end{itemize}
+In an environment with only large area light sources, there exists a simple first order approximation to global illumination called Ambient Occlusion. It is used a form of simplified global illumination because it takes into account only screen-space visible  scene geometry\cite{Miller:1994:EAL:192161.192244}.  Each view-ray from the camera's pixel samples defines a single point on the surface of the scene geometry. The algorithm uses these local screen-space geometry samples to approximate how exposed each surface fragment is incoming ambient light sources by estimating how much of the hemisphere around that point is blocked by nearby surfaces. For lighting conditions that are close to a uniformly bright hemisphere, like an overcast day, then ambient occlusion is a good approximation of global illumination.
+%This method fails in scenes and camera positions where light occluding geometry that is not-visible to the camera projection dominate the illumination function \tompson{When else does this fail?}. 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Loss functions used}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{All data rendering and generation methods}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\end{comment}
-\begin{comment}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{OpenGL}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-We created an OpenGL \cite{Shreiner:2013:OPG:2544032} based renderer in C++ and bound it to pyTorch and python using FFI.  OpenGL is a 3D API that is cross platform and allows for direct programming of GPUs.  
-\end{comment}
+\subsubsection{Global Illumination}\label{mitsuba_section}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Global Illumination}\label{mitsuba_section}% and Mitsuba}\label{mitsuba_section}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (such as real-time rasterization-based renderers).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset is diffuse and there are few surfaces capable of reflecting light onto the objects in the scene. We made this decision to avoid the typical thousands of iterations necessary to get a noise free image. \footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
 
-%\tompson{Remove "and Mitsuba"}
-Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (such as real-time rasterization-based renderers).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. \edit{We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset}
-%We are fortunate in that in our dataset \tompson{Rephrase this: you're not ``fortunate'' that the dataset has this characteristic. Try selling it a bit more...  You CHOOSE a classification dataset with homogeneous and simple material properties.} all of our surfaces
-are diffuse and there are few surfaces capable of reflecting light onto the objects in the scene.  \edit{We made this decision to avoid the typical thousands of iterations}% This means the sample counts} 
-%\tompson{what samples? This is the first time you're using "sample" in this context.} needed to converge our scenes represent the low end needed to adequately simulate an image in a GI renderer. Typically, thousands of samples are 
- necessary to get a noise free image\footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
+In order to simulate global illumination in our experiments, we used the open source global illumination renderer, Mitsuba.  It generates high quality images that it creates by solving the rendering equation by bouncing many light rays throughout the 3D scene.  The more samples it takes, the closer to the solution and the more realistic the image becomes, but at the cost of high computation; images rendered by Mitsuba often take many orders of magnitude longer than with rasterization methods such as ones included in OpenGL.  
 
-In order to simulate global illumination in our experiments, we used an open source global illumination renderer called Mitsuba\cite{Mitsuba}.  It generates high quality images that it creates by solving the rendering equation
-%\cite{Kajiya:1984:RTV:800031.808594} \tompson{2 comments: 1. Don't phrase things as "trying to solve" (this implies negative), just say "solve". 2. There's no need to cite the rendering equation} 
-by bouncing many light rays throughout the 3D scene.  The more samples it takes, the closer to the solution and the more realistic the image becomes, but at the cost of high computation; images rendered by Mitsuba often take many orders of magnitude longer than with rasterization methods such as ones included in OpenGL \tompson{Careful: OpenGL != rasterization! OpenGL is a framework for general purpose computing these days.}.  
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Training Data creation}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 Direct comparisons between rendering techniques and real images could not be done without creating a dataset that has approximately 1:1 correspondence between domains.  To this end we identified the NYU Object Recognition Benchmark (NORB) dataset \cite{LeCun:2004:LMG:1896300.1896315} as a good starting point. It is small enough to allow for recreation of each photograph with high accuracy in simulation.  A characteristic that makes NORB even more attractive is that the object location, rotation, camera placement and lighting condition are known for every image. Furthermore, each object was modified so that the BRDF of each object was approximately homogeneous across the dataset.
 
-However, the NORB dataset is comprised of grayscale images, which is less-relevant for modern deep-learning architectures. As such, we composed an additional dataset of synthetic objects from Shapenet~\cite{DBLP:journals/corr/ChangFGHHLSSSSX15} (choosing a disjoint set of object classes), where the ground-truth RGB image is the result of our most expensive offline rendering method available. This dataset was digital-only and did not have physical models that we could scan like the NORB dataset. So, we used synthetic renders for both training the learning model and testing its accuracy. %%\tompson{I don't get this last point.}%%
+However, the NORB dataset is comprised of grayscale images, which is less-relevant for modern deep-learning architectures. As such, we composed an additional dataset of synthetic objects from Shapenet~\cite{DBLP:journals/corr/ChangFGHHLSSSSX15} (choosing a disjoint set of object classes), where the ground-truth RGB image is the result of our most expensive offline rendering method available. This dataset was digital-only and did not have physical models that we could scan like the NORB dataset. So, we used synthetic renders for both training the learning model and testing its accuracy.
+
 While this is not sufficient on its own to make conclusions about our learning model on real image data, we use this additional synthetic dataset to validate our grayscale norm results on a RGB dataset of similar complexity and composition. %TODO: reread this?
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{NORB Dataset}\label{NORB-DATASET}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\begin{comment}
-Training with real data then using the model to classify real test images gives the baseline performance.  Training the vgg08 batchnorm model with NORB photographs from one lighting condition results in 4050 training images. Training with this data results in an accuracy of 96.86\% on test images from the same lighting condition.
-\end{comment}
 \begin{figure}[h!]
 \centering
 \includegraphics[width=1.0\columnwidth]{./assets/NORBTestSmall.png}
@@ -347,39 +232,17 @@ Training with real data then using the model to classify real test images gives 
 \label{fig:norb-samples}
 \end{figure}
 %TODO: figure vspace?
-%The NORB \cite{LeCun:2004:LMG:1896300.1896315} dataset is quite old and simple and is not used to train and test classifiers anymore.  However the nature of the dataset allows it to be very useful in experimenting with rendering techniques due to the characteristics of the data.\\
-The NORB dataset consists of a set of 50 toys split into a 25 object training set and a 25 object test set. For each object, stereo photographs were taken with the object on a turntable in 6 controlled lighting conditions and with 18 camera azimuth angles and 9 elevation angles. This results in a dataset with 48,600 stereo pictures.  We limited our use of the dataset to just the 25 objects in the training set.% consisting of $6\cdot9\cdot18\cdot25=24,300$ images in the dataset we generated for our tests \tompson{reread this sentence. It makes no sense.}.  
-We also confined our dataset to one lighting condition\edit{, % to keep it uniform across all images\tompson{Why? Why couldn't you generate all lighting conditions? If you don't have a good excuse, don't give one, just state the fact.}.
-reducing} the image count in the training dataset to 4,050 images.   The toys were painted a uniform color with a matte paint. This was intended to prevent texture from being used in classification.
 
- All of the properties listed above facilitate a near-perfect recreation of the original scenes through 3D rendering (whereas it would be significantly more complicated to recreate natural outdoor scenes with perfect 1:1 geometry correspondence). We know the pose, location and surface of the objects as well as the location of the camera. We set the material properties of the objects to be a uniform color hand-chosen to match the NORB model color % Not sure if this is a good way to put it... but it's what we did
- and diffusely reflective. \sout{This leaves us with the task of accurately recreating the geometry of the toys in 3D.}
+The NORB dataset consists of a set of 50 toys split into a 25 object training set and a 25 object test set. For each object, stereo photographs were taken with the object on a turntable in 6 controlled lighting conditions and with 18 camera azimuth angles and 9 elevation angles. This results in a dataset with 48,600 stereo pictures.  We limited our use of the dataset to just the 25 objects in the training set. We also confined our dataset to one lighting condition, reducing the image count in the training dataset to 4,050 images. The toys were painted a uniform color with a matte paint. This was intended to prevent texture from being used in classification.
+
+ All of the properties listed above facilitate a near-perfect recreation of the original scenes through 3D rendering (whereas it would be significantly more complicated to recreate natural outdoor scenes with perfect 1:1 geometry correspondence). We know the pose, location and surface of the objects as well as the location of the camera. We set the material properties based on the paint used for the physical toy models.
+ %of the objects to be a uniform color hand-chosen to match the NORB model color and diffusely reflective.
  
- After acquiring \sout{and scanning} the objects, %\footnote{We acquired some of the toys by asking the original authors for them with the missing ones located on EBay. }\tompson{Firstly, I fixed what I think was a syntax error...  It looks like you forgot a curly brace. Secondly, this is a completely irrelevant detail. Remove it.}%Examples of the toys are shown in figure \ref{fig:norbscans}. 
-we used the HP 3D Structured Light Scanner Pro S3\cite{HPSCANNER} to scan in the objects. The models were then
-% cleaned to remove geometry artifacts from the scan \tompson{Cleaned up? What do you mean? This sounds like a hack. Either go into more detail (so it doesn't sound like a hack) or don't mention it. Note that most 3D scanners will do post-processing anyway, so it's more or less an irrelevant detail.} and 
-uniformly scaled to fit into a unit cube with the bottom center at the origin.  \sout{Models setup this way allow for a standard way to rotate the objects and place them so they touch the ground plane.} We created a matching g-buffer for every image in the training dataset.  
+After acquiring the objects, we used the HP 3D Structured Light Scanner Pro S3\cite{HPSCANNER} to scan in the objects. The models were then uniformly scaled to fit into a unit cube with the bottom center at the origin. We then rendered a matching g-buffer for every image in the training dataset.  
 
-Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the source NORB dataset. % \footnote{Early tests did not have this final processing step, and resulted in lower accuracy test results due to the difference between the formatting of the synthetic training data and the real test data. \tompson{This looks like thesis filler. Remove it.}}
- This dataset creation procedure results in a one-to-one mapping between each image in the synthetic training dataset with the corresponding ``real'' image in the NORB training dataset, which allow us to empirically evaluate different rendering and generative model techniques conditioned on our captured g-buffers (ensuring the differences in model performance can be directly attributed to shading technique rather than the input images). \tompson{This sentence is a repeat I think of something you've said earlier.}
-%It also allows for direct comparison between rendered images and the real images because the images are not just of the same object but are an accurate recreation of each photograph in the original dataset. \tompson{Last sentence is redundant.}
+Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the source NORB dataset. This creation procedure results in a one-to-one mapping between each image in the synthetic training dataset with the corresponding ``real'' image in the NORB training dataset.
 
 As briefly mentioned, the NORB dataset does have its shortcomings when compared to recent deep-learning datasets of significantly larger size. The dataset is black and white, low resolution, has very little visual variety and it small in number of samples. While these are drawbacks, the dataset was generated using a controlled capture environment, which helps us eliminate variables such as bad lighting or background noise when evaluating our learning model. Therefore, we can conduct experiments comparing only rendering variables, such as lighting, rendering methods, and more. These conditions are detailed later.
-%While these are drawbacks, it does not prevent us from conducting experiments on rendering methods and comparing them to each other \tompson{but why? Suggestion: "Even with these limitations: it's relatively homogeneous and controlled capturing environment provides a unique opportunity to validate ...."}. The dataset is simple \tompson{again, don't use the word "simple"!} and allows for more controllable experiments.  However, it does make it harder to conclude that a method that works for this dataset will also work for datasets with more complex imagery. \tompson{Remove this last sentence.}
-
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[width=0.8\linewidth]{./assets/ToysScannerAndScan.png}
-%\caption{Top: Two pictures of NORB Toys on the turntable taken from one of scanner's cameras.\\ Bottom: Results of scan when cleaned and reduced to 65,000 vertices.}
-%\label{fig:norbscans}
-%\end{figure}
-%
-%\begin{figure}[h!]
-%\centering
-%\includegraphics[width=0.8\columnwidth]{./assets/david_scanner.JPG}
-%\caption{A picture of the scanner setup used to generate 3D models of the physical toys. The turntable used to rotate the toys to get a full 360-degree view is not shown here.}
-%\label{fig:david}
-%\end{figure}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Shapenet Dataset}
@@ -395,19 +258,17 @@ As briefly mentioned, the NORB dataset does have its shortcomings when compared 
 \label{fig:SHAPENET}
 \end{figure}
 
-The Shapenet dataset consists of tens of thousands of models. For our tasks, we took a subset of Shapenet, taking 10 different models from 10 categories each. The dataset size was chosen to match similar popular, small datasets CFAR-10 \cite{Krizhevsky09learningmultiple} and MNIST \cite{726791}. The categories we chose were airplanes, boats, cars, chairs, motorcycles, mugs, pianos, planters, tables, and trains. This provided a wide variety of models that could be identified from many different camera angles. \sout{Within each category, we chose a set that featured different colorations and types (dirt bikes and street bikes in motorcycles), but avoided models that deviated too far from the standard object, such as motorcycles with three wheels.}
-
-%Each Shapenet model was raised to sit on a ground plane, and the $xz$-position was centered. That is, for the set of vertices $V$ in the mesh, $\min_{v\in V} v_y = 0$, $\sum_{v\in V} v_x = 0$, and $\sum_{v\in V} v_z = 0$. The first condition was held so that we could render a ground plane under the object at $y=0$, and the second condition helped eliminate some variability in the images. %ehhhhhhhh, this seems obvious. But OK. We can remove this if space is needed!
+The Shapenet dataset consists of tens of thousands of models. For our tasks, we took a subset of Shapenet, taking 10 different models from 10 categories each. The dataset size was chosen to match similar popular, small datasets CFAR-10 \cite{Krizhevsky09learningmultiple} and MNIST \cite{726791}. The categories we chose were airplanes, boats, cars, chairs, motorcycles, mugs, pianos, planters, tables, and trains. This provided a wide variety of models that could be identified from many different camera angles. 
 
 After each model was changed to fit the above conditions, they were then rendered using the Mitsuba renderer. An infinitely large, matte ground plane was created below the objects, and two large, spherical area lights were created above the object to create shadows. In a specific experiment, detailed later, these lights were replaced by a single directional light to create harder shadows. For each model, we used 162 randomly sampled camera angles. The camera angles were chosen such that the elevation angles were between 30 and 70 degrees, and the azimuth could be any angle (between 0 and 2$\pi$ radians). These bounds and the number of samples were chosen to best match the NORB dataset. The randomization was chosen uniformly, such that if $\zeta_1,\zeta_2\in[0,1]$ are uniformly distributed random numbers, then the elevation angle $\theta$ and azimuth angle $\phi$ are $\theta = \cos^{-1}\zeta_1$, $\phi = 2\pi \zeta_2$. This follows the formula given by \cite{Pharr:2010:PBR:1854996}. The images were rendered at 96x96, outputting the G-buffer of each image, including the image albedo, normals, occlusion, distance field, and color image data.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Experiments}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 In our experiments, we use increasingly complex simulation methods for rendering our images.  We start with just a silhouette as training data and we then incrementally increase the sophistication level of the simulation during rendering.  We then add complexity such as shading, shadowing and global illumination. Finally, we use a form of a denoising autoencoder to learn cleanup and refine GI based images \footnote{See figure \ref{fig:denoise} and section \ref{denoising} for denoiser details}.
 
-In order to principally measure the impact of these various techniques, we use a single classifier architecture across all experiments; a simplification of the VGG network\cite{DBLP:journals/corr/SimonyanZ14a}. Given the small size of the NORB dataset, we reduce the standard VGG network to 8 learnable layers, including 5 convolutional and 3 fully-connected layers. We then use a cross-entropy loss (i.e. negative log likelihood) to train the 5-class output. See 
+In order to principally measure the impact of these various techniques, we use a single classifier architecture across all experiments; a simplification of the VGG network\cite{DBLP:journals/corr/SimonyanZ14a}. Given the small size of our datasets, we reduce the standard VGG network to 8 learnable layers, including 5 convolutional and 3 fully-connected layers. We then use a cross-entropy loss (i.e. negative log likelihood) to train the 5-class output. See 
 Figure~\ref{fig:VGG_DAIGRAM} for an overview of this architecture.
 
 \begin{figure}[h!]
@@ -417,24 +278,23 @@ Figure~\ref{fig:VGG_DAIGRAM} for an overview of this architecture.
 \label{fig:VGG_DAIGRAM}
 \end{figure}
 
-\subsection{NORB Experiments}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Training on Real Images}
+\subsection{Baseline}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To establish a baseline performance level we train our classifier on the NORB dataset using the ``real'' RGB image data. Note that for our experiments we use a single lighting condition for both test and training data to simplify experimental setup.  This reduces the test and training datasets to 4,050 images each.  A synthetic g-buffer is constructed for each image in the training set at the target resolution.
+The first experiment done for a dataset is to train a classifier with data that is from the same domain as the test set.  In NORB, this is using the real photographs for training and in ShapeNet, it is the highest sample count Mitsuba rendered images. 
+%To establish a baseline performance level we train our classifier on the NORB dataset using the ``real'' RGB image data. 
+Note that for our experiments we use a single lighting condition for both test and training data to simplify experimental setup.  
+%This reduces the test and training datasets to 4,050 images each. 
+A synthetic g-buffer is constructed for each image in the training set at the target resolution.
 
-%We repeat each experiment, training on half of the models in our Shapenet database and testing on the other half of those models. Our findings with the Shapenet dataset were consistent with the NORB dataset, and so the below sections will mainly focus on the results of the NORB dataset. \tompson{huh? IMO It would be a cleaner story if you present NORB results first and don't even discuss Shapenet. Then discuss how you evaluate on RGB.} 
-The goal if this experiment is to see if any of the classifiers training on synthetic data can achieve similar performance to that of a classifier trained on real data (on the NORB validation set), by varying various rendering parameters and measuring their quantitative impact on classifier performance.  See figure \ref{fig:norb-samples} for examples of the NORB images.
+This establishes a target classifier accuracy to be used for measuring the induced accuracy of using the training data created by the rendering methods used in this work. Next, we conduct multiple experiments by varying various rendering parameters and measuring their quantitative impact on classifier performance.  %See figure \ref{fig:norb-samples} for examples of the NORB images.
 
-Training with the ``real'' NORB data yields a 95.01\% accuracy.  %This score is achieved by training for 200 epochs without any data augmentation \tompson{WHAT?! Why no data augmentation when training on the real data! Honestly, at this point I would not even mention this even though its a minor lie-by-omission... it makes the experimental results look really bad. You should have used data augmentation. You should always use data augmentation.} and a learning rate of 5e-5 \tompson{No need to mention learning rate, because it's largely a meaningless number (depends on how you normalize the loss and various other scale values).}. We normalize the ``real'' and synthetic images to lie in $[-1, 1]$ \tompson{is this correct?} and we rescale each g-buffer depth map to be in $[0,1]$. For the remainder of our experiments when we train this classifier, the epoch count remains the same and the training data is not augmented \tompson{This is probably NOT a good thing at all, it's not really a fair comparison to use a static set of hyperparameters as you vary input data statistics... that is, you've optimized hyper parameters for one model instance, but you don't do the same for the others. For now, I'd remove this sentence.}.\\  
-
-%By keeping the training the same across experiments, we isolate any difference in scores to be only attributable to shading. \tompson{No, no, no, no.  See previous comment. Remove this, I think it's totally wrong. If you vary data statistics, you vary the error manifold of your loss. You have to ensure that SGD converges to a reasonable local minima for all model instances (all with the same model architecture), otherwise it's not a fair comparison. Also, technically each training run is a stochastic episode and the final optimized model is itself a sample of a distribution of models... So to be super correct, you'd need to train many models (with different initial seeds) and report the mean and variance of performance.}
+\edit{TO RESULTS: Training with the ``real'' NORB data yields a 95.01\% accuracy.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{table}[]
 \centering
-\label{tblnonGI}
 \begin{tabular}{|l|r|r|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Input}}
@@ -449,12 +309,11 @@ SH Shading + AO				&60.89\%    & 34.12 / 64.09\%   \\
 \end{tabular}
 
 \caption{Performance of real-time (rasterization-based) rendering methods. Albedo Only is passing in the albedo map (see figure \ref{fig:GBUFFER_ALBEDO}). Learned SH Shading is unshadowed shading. SH Shading + AO is unshadowed shading with AO composited with the result. See section \ref{sec:learned_sh} for more detail. 2 Bounce (Direct Lighting) is a shading plus shadowing that is described in section \ref{sec:2bounce}. $\Delta$ vs Real has two numbers: the left is the difference in accuracy from the best result of each method compared to using real data, and the right is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. Data augmentation was used in all of the above experiments except Real Images. \tompson{Caption is way too big. Move the content here (description of each experiment) to the main body of text.}} 
+\label{table:tblnonGI}
 \end{table}
-
 
 \begin{table}[]
 \centering
-\label{tblnonGI}
 \begin{tabular}{|l|r|r|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Input}}
@@ -467,22 +326,22 @@ Learned SH Shading			&47.80\%	& 36.19 / 56.91\%	\\
 \textbf{1024 Sample Renderings}		& \textbf{83.99}\%	& \textbf{0 / 100.00}\%	\\ \hline
 \multicolumn{3}{|c|}{\textbf{Performance Of Basic Rendering Methods}}	\\ \hline
 \end{tabular}
-\caption{Scores using the Shapenet dataset. Data augmentation was not used for the experiments listed above, as the training and test dataset were already aligned during the generation of the dataset.} 
+\caption{Scores using the Shapenet dataset.}
+\label{table:tblnonGI_sn}
 \end{table}
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{No Shading - Albedo Only}
+\subsection{No Shading - Albedo Only}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-To establish a baseline for synthetic performance, we train with just the albedo map as input.  This is equivalent to an unshaded scene, and establishes what the classifier can learn without any shading information. See figure \ref{fig:GBUFFER_ALBEDO}.  \kris{Move this into discussion section: The classification score achieved is only 46.20\%. All of the other methods score better than this, which confirms that simulating how light interacts with the object is significant.} \tompson{Obvious last sentence. Remove it or move it to a later section (since you haven't discussed the other methods yet).}
+To establish a baseline for synthetic performance we train with just the albedo map as input.  This is equivalent to an unshaded scene, and establishes what the classifier can learn without any shading information. See figure \ref{fig:GBUFFER_ALBEDO}.  \kris{Move this into discussion section: The classification score achieved is only 46.20\%. All of the other methods score better than this, which confirms that simulating how light interacts with the object is significant.} \tompson{Obvious last sentence. Remove it or move it to a later section (since you haven't discussed the other methods yet).}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Shading Extracted from Rendering Through Learnable Spherical Harmonics}\label{sec:learned_sh}
+\subsection{Shading Extracted from Rendering Through Learnable Spherical Harmonics}\label{sec:learned_sh}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\columnwidth]{./assets/SHComparisons.png}
-\caption{Top: Learned spherical harmonics lighting and diffuse shading without albedo. Middle: Albedo multiplied by learned spherical harmonics lighting with diffuse shading. Bottom: Learned spherical harmonics lighting with albedo and ambient occlusion and diffuse shading.}
+\includegraphics[width=1.0\columnwidth]{./assets/sh-comp-onerow.png}
+\caption{Left: Learned spherical harmonics lighting and diffuse shading without albedo. Middle: Albedo multiplied by learned spherical harmonics lighting with diffuse shading. Right: Learned spherical harmonics lighting with albedo and ambient occlusion and diffuse shading.}
 \label{fig:SHComparison}
 \end{figure}
 
@@ -495,35 +354,40 @@ To establish a baseline for synthetic performance, we train with just the albedo
 \label{fig:SHN}
 \end{figure}
 The next step beyond albedo-only rendering is shading without shadows. We chose to learn the shading given a full rendering 
-%\tompson{This is a terrible reason (it makes you seem incompetent, even if it's impossible to do). Remove this detail, or in the very lest just say that Mitsuba does not support rendering without shadows (but even then I don't think you should mention this). Just jump straight into the description of the experiment. Mention that the motivation }.  
+%\tompson{This is a terrible reason (it makes you seem incompetent, even if it's impossible to do). Remove this detail, or in the very lest just say that Mitsuba does not support rendering without shadows (but even then I don't think you should mention this). Just jump straight into the description of the experiment.}.  
 We did this with a Spherical Harmonics (SH) module that enabled learning the 9 parameters to the 3 bands of functions.  These are enough bases to learn diffuse surfaces within a 99\% accuracy \cite{Shreiner:2013:OPG:2544032}. 
 
-The input data is a normal buffer and an albedo buffer.  The target is the full 128 sample GI render of the scene.  The SH module takes the normals as input and outputs an intensity.  That is then multiplied by the albedo and passed into a L1 loss function.  The loss is then backpropogated through the SH layer to adjust the shading. This is represented in figure \ref{fig:SHN}.
+\tompson{Sorry, I got pulled into a meeting and didn't finish my last thought :-(  You need to give some motivation for why you're learning the shading function. I'm not 100 percent sure what to write, maybe something along the lines of "optimizing the rendering equation will maximize performance for a given renderer topology, since it will best match the rendered images to the distribution of real images". Something along those lines...}
+
+The input data \tompson{Input to what? The renderer?} is the normal and albedo buffers.  The target is the full 128 sample GI render of the scene.  The SH module takes the normals as input and outputs an intensity.  That is then multiplied by the albedo and passed into a L1 loss function \tompson{I thought you used SSRI? Why did you use loss for this part of the experiment?}.  The loss is then backpropagated through the SH layer to adjust the shading. This is represented in figure \ref{fig:SHN}.
 
 The result is a network that has learned the shading of the objects based upon the lighting in the target images.  The output also has the desired property of not having any shadows and allows us to test for shading based on surface normals.
 
-For examples of  learned SH lighting see figure \ref{fig:SHComparison}.
+For examples of the learned SH lighting see figure \ref{fig:SHComparison}.
 
 \kris{PUT INTO DISCUSSION: Training with just the composition of SH and albedo results in an accuracy of 48.52\%.   Compositing the SH shaded surface with the albedo and AO maps gives the most realistic result.  The classifier trained with the composition of all three has an accuracy of 55.80\%, which is indeed higher than just compositing SH and albedo.  This shows that at least some form of shadows are important for classification.}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Two Bounce Mitsuba}\label{sec:2bounce}
+\subsection{Two Bounce Mitsuba}\label{sec:2bounce}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=1.0\columnwidth]{./assets/2bounce_small.png}
-\caption{Two Bounce Rendering.  Notice it is the equivalent to a shadow mapped scene and differs from the AO composited scenes by the sharpness of the shadows. This is due to the scene using a single directional light.}
+\caption{Two Bounce Rendering.  Note that it is the equivalent to a shadow mapped scene and differs from the AO composited scenes by the sharpness of the shadows. This is due to the scene using a single directional light.}
 \label{fig:2BOUNCE}
 \end{figure}
 % TODO: this paragraph bounces between past and present tense, reads kind of weird
-Now that we have seen that an approximate shadow (Ambient Occlusion) helps the classifier, we add shadows to the synthetic dataset. However, we don't want inter-reflections and global illumination, as we test that separately.  This can be achieved in Mitsuba by limiting how many bounces the rays take during simulation.  We only allow the rays fired through the screen to hit an object, bounce, and see if it hits a light source.  There are no secondary bounces to allow indirect lighting to illuminate the object. We also choose to use a single directional light to create very hard shadows.  This will allow us to contrast the performance of hard shadows and soft shadows which are both present in the real dataset.  This is also a good approximation of what a video game engine might produce and can be used as a proxy for video game engine generated synthetic data.  See figure \ref{fig:2BOUNCE} for examples of this rendering method.  The resulting performance from training with this data was very similar to SH composited with albedo and AO.  It yields an accuracy of 55.78\%.  An possible explanation could be that the real data has one sharp shadow from an overhead light and a soft shadow from another. Additionally, ambient occlusion is a good approximation of the dominant light source in the scene which is large with uniform brightness and occupies a large part of the hemisphere surrounding the object.
+Now that we have seen that an approximate shadow (Ambient Occlusion) aids classification \tompson{Rephrase this if you're moving it into the discussion section (because they haven't seen any results yet)...}, we add shadows to the synthetic dataset. However, we don't want inter-reflections and global illumination, as we test that separately \tompson{Rephrase: Just say that you want to measure the impact of inter-reflections and global illumination but with some shadow detail, and so you also include an experiment where you restrict the number of bounces to 2.}.  This can be achieved in Mitsuba by limiting how many bounces the rays take during simulation.  We only allow the rays fired through the screen to hit an object, bounce, and see if it hits a light source.  There are no secondary bounces to allow indirect lighting to illuminate the object. We also choose \tompson{past-tense is chose?} to use a single directional light to create very hard shadows.  This will allow us to contrast the performance of hard shadows and soft shadows which are both present in the real dataset.  This is also a good approximation of what a video game engine might produce and can be used as a proxy for video game engine generated synthetic data \tompson{Is this true? Most engines these days have some form of (crappy) GI.}.  See figure \ref{fig:2BOUNCE} for examples of this rendering method.  \tompson{Move this into a discussion section to be consistent.} The resulting performance from training with this data was very similar to SH composited with albedo and AO \tompson{What is A0? First use of this term.}.  It yields an accuracy of 55.78\%.  A possible explanation could be that the real data has one sharp shadow from an overhead light and a soft shadow from another. Additionally, ambient occlusion is a good approximation of the dominant light source in the scene which is large with uniform brightness and occupies a large part of the hemisphere surrounding the object.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Varying Sample Count in the Mitsuba Path Tracer}
+\subsection{Varying Sample Count in the Mitsuba Path Tracer}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\tompson{To make this seem less like a collection of unrelated experiments, I suggest you rename your subsubsection headings so that there is a consistent progression. I would expect: Albedo Rendering (no shading), Learned-Diffuse Rendering (shading with no shadows), Single-Bounce Rendering (shading with hard shadows), Multi-Bounce Rendering (shading with soft shadows).  These section headings will make the store a lot cleaner...}
+
 \begin{table*}[]
 \centering
 \begin{tabular}{|l|r|r|r|r|}
@@ -539,7 +403,7 @@ Single GAN	& 72.84\%	& 77.65\% 	& 75.26\%	& \textbf{17.36 / 81.73\%}	\\
 Multiple GAN& 85.23\%	& 84.37\% 	& 87.33\% 	& \textbf{7.68 / 91.92\%}		\\ \hline
 \multicolumn{5}{|c|}{\textbf{Performance of GI Rendered Refined Images}}	\\ \hline
 \end{tabular}
-\caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs. $\Delta$ vs Real has two numbers. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba). Data augmentation was used for the Mitsuba experiments. }
+\caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs\tompson{What GAN output? This is the first time your mentioning GANs. Never, ever, ever, ever (times infinity + 1) show results for a term, model, experiment, etc without first describing it. For this reason, I would move this table WAY down a few pages on.}. $\Delta$ \tompson{IMO, I find this notation confusing. "Performance loss" would be a better column heading.} vs Real has two numbers \tompson{Yes, this is confusing. Pick one of these to show (it's redundant to have both). Simple is better.}. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details \tompson{Rule of thumb: a reader should have already read all information they need to understand your results}. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba) \tompson{Remove the bold highlighting.}. Data augmentation was used for the Mitsuba experiments. \tompson{caption is too long. Move some content into body text.}}
 \label{tblallrefined}
 \end{table*}
 
@@ -564,10 +428,9 @@ Multiple GAN& 86.48\%	& 86.65\% 	& \textbf{-2.66 / 103.17\%}		\\ \hline
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\columnwidth]{./assets/DifferentSampleCounts.png}
+\includegraphics[width=1.0\columnwidth]{./assets/mitsuba-onerow.png}
 \caption{
-Mitsuba renders at different sample counts. Top: 1 sample per pixel.  Middle: 4 samples per pixel.  Bottom: 128 samples per pixel
-}
+Mitsuba renders at different sample counts. Left: 1 sample per pixel.  Middle: 4 samples per pixel.  Right: 128 samples per pixel.}
 \label{fig:differentsamplesraw}
 \end{figure}
 \begin{comment}
@@ -592,24 +455,23 @@ Mitsuba renders at different sample counts. Top: 1 sample per pixel.  Middle: 4 
 \end{comment}
 
 
-The last rendering feature that we add to achieve the most realism is allowing light to bounce inside the environment, reflecting off of surfaces and onto other objects in the scene.  Multiple bounces soften the shadows and allow light to come from below the object by reflecting off the ground plane.
+The last rendering feature that we add to achieve the most realism is allowing light to bounce inside the environment, reflecting off surfaces and onto other objects in the scene.  Multiple bounces soften the shadows and allow light to come from below the object by reflecting off the ground plane. \tompson{And other stuff! Volumetric fog, mirrors, ambient occlusion, etc...}
 
-
-A global illumination (GI) renderer creates images by firing rays through each pixel and checks for intersections with surfaces in the scene.  If it hits anything, it then fires many more rays emanating from the hit point and determines, inside a certain number of bounces, if the ray eventually hits a source of light.  It is important to realize that it takes many samples per bounce to accurately determine all of the incoming light arriving at a point upon an object's surface.
+A global illumination (GI) renderer creates images by firing rays through each pixel and checks for intersections with surfaces in the scene \tompson{Too general a statement. Not all GI renderers are ray marching/tracing! Rephrase as, "For our GI experiments we will use Mitsuba, a ray tracing GI rendering engine, which renders by sampling rays, ......" Or something like that. But in general though, I'm a little worried that you're over explaining stuff. The confusing thing is that you've already talked about number of bounces in the previous section, and so all you should need to say here is that you let the number be > 1. You might want to consider moving a condensed version of your ray-tracer explanation earlier in the experimental setup when you first mention Mitsuba.}.  If it hits anything, it then fires many more rays emanating from the hit point and determines, inside a certain number of bounces, if the ray eventually hits a source of light.  It is important to realize that it takes many samples per bounce to accurately determine all of the incoming light arriving at a point upon an object's surface.
 %Random sampling plays a heavy part in allowing the calculations to be efficient. 
-However, if not enough samples are used it GI introduces noise into the final output. This is especially true for scenes composed of shiny surfaces and small bright light sources which induce light intensities along surfaces that can change very quickly.
+However, if not enough samples are used it GI introduces noise into the final output. This is especially true for scenes composed of shiny surfaces and small bright light sources which induce light intensities along surfaces that can change very quickly. \tompson{Yeah, for sure this feels like thesis-filler. It's WAY too verbose and is borderline insulting the intelligence of your readers...  I mean, we know they're all stupid, but we don't have to call it out ;-)}
 
-We are fortunate that our scenes only involve surfaces that are diffuse and light sources that are relatively large compared to the illuminated objects.  Therefore it takes fewer samples to resolve the lighting for our images, as the intensity of reflected light varies slowly across diffuse surfaces.  However, we found we needed at least 128 samples per pixel to reduce the noise to be imperceptible. The high sample count is a significant problem with GI renderers, and is a major factor in the high computational cost per image.  For complex scenes with certain lighting and materials, it can take hours to generate an image.  Even in our simple scenes, it still took over a minute per image at 768x768 and 128 samples per pixel, while using one or four samples per pixel took only a few seconds a frame.
+We are fortunate that our scenes only \tompson{"our" here and in the next sentence is too possessive. The NORB scenes are not yours.} involve surfaces that are diffuse and light sources that are relatively large compared to the illuminated objects.  Therefore it takes fewer samples to resolve the lighting for our images, as the intensity of reflected light varies slowly across a diffuse surface.  However, we found we needed at least 128 samples per pixel to reduce the noise to be imperceptible \tompson{change imperceptible to either use a precise measure (SNR measures for instance) or something even more vague "to be acceptable". "imperceptible" implies that you just tweaked values until you thought it looked good.}. High sample count is a known problem with GI renderers, and is a major factor in the high computational cost per image.  For complex scenes with certain lighting and materials, it can take hours to generate an image.  Even in our simple \tompson{avoid "simple"} scenes, it still took over a minute per image at 768x768 and 128 samples per pixel, while using one or four samples per pixel took only a few seconds a frame.
 
 %Given that the full sample images are expensive to compute, can you use the noisy images? Is the noise in the image a problem for a convnet based classifier?  \footnote{This question was also asked by \cite{DBLP:journals/corr/VeeravasarapuRR16}. See Related work section}. To answer this question, 
-We generated datasets using just one per pixel and four samples per pixel. We then used them to directly train a classifier.  We learned that the classifier can handle some noise without a performance penalty,  but too much noise hurts performance enough to negate the fact that a GI renderer is being used.  The baseline comparison is the 128 ``noiseless'' image, which achieves a performance of 74.84\%.  The 4-sample image is close in performance but also does not have much noise.  It gets an accuracy of 72.89\%, which is quite close to 128 samples while being 32 times less computation.  The single sample image only achieves an accuracy of 57.21\%, which is significantly worse and is in the same order of accuracy as much cheaper rendering methods.  However, the single sample per pixel image has a significant amount of noise.  The difference between the 1 and 4 sample images is most apparent at the edges. Four samples seems to be enough to have resolvable edges while only 1 sample was insufficient to define a border between shadow and unshadowed regions. See figure \ref{fig:differentsamplesraw} to see the difference in image quality based upon sample count. 
+We generated datasets using just one per pixel and four samples per pixel \tompson{huh? why did you mention 128 then?}. We then used them to directly train a classifier.  We learned that the classifier can handle some noise without a performance penalty,  but too much noise hurts performance enough to negate the fact that a GI renderer is being used.  The baseline comparison is the 128 ``noiseless'' image \tompson{ahhhhhh. now I get it. Rephrase as "we generated datasets using 1, 4 and 128 samples per pixel, where we consider 128 samples to be a good approximation of a noiseless (ideal) render.}, which achieves a performance of 74.84\%.  The 4-sample image is close in performance but also does not have much noise.  It gets an accuracy of 72.89\%, which is quite close to 128 samples while being 32 times less computation.  \tompson{Again, move performance numbers somewhere else? or at this point just be consistent.} The single sample image only achieves an accuracy of 57.21\%, which is significantly worse and is in the same order of accuracy as much cheaper rendering methods. However, the single sample per pixel image has a significant amount of noise \tompson{You didn't measure it so how do you know it's significant. It's only reasonable to say that the trend is expected due to the increase in noise (not that YOU think it's value is significant).}.  The difference between the 1 and 4 sample images is most apparent at the edges \tompson{Edges of what? The image? The geometry? The Shadows? Be specific.}. Four samples seems to be enough to have resolvable edges while only 1 sample was insufficient to define a border between shadow and unshadowed regions. See figure \ref{fig:differentsamplesraw} to see the difference in image quality based upon sample count. 
 %Mitsuba is a free open source path tracer that allows for the control of how many bounces a light can take before it no longer is simulated and it allows for how many samples are taken per pixel.\\
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsubsection{Train on Denoised Images} \label{denoising}
+\subsection{Train on Denoised Images} \label{denoising}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %Remembering that GI renderers are computationally expensive, we wanted to try techniques that would lower the render time. We wanted to see if we can get away with allowing the GI renderer to use fewer samples per pixel, and as a result, spend much less time computing images while maintaining the same performance from the dataset. 
-Knowing that noisy images are still useful for training, we leverage the information in them to create a new image that performs better. Utilizing noisy images and equivalent ground truth versions, we ran experiments where we learned to denoise the images before training.  We implemented a simplified version of the network in \cite{Chaitanya:2017:IRM:3072959.3073601}.  We remove the recurrent part of the architecture because we are not learning animated sequences of images where noise removal has to be consistent across frames. The paper describes their architecture as a denoising auto-encoder with skip connections.  Our simplified version is shown in figure \ref{fig:denoise}. 
+Knowing that noisy images are still useful for training, we leverage the information in them to create a new image that performs better. Utilizing noisy rendered images and their corresponding ``real'' RGB version, we trained a generative model to denoise the dataset images before training. To do so we use a simplified version of the denoising auto-encoder with skip connections network proposed by \cite{Chaitanya:2017:IRM:3072959.3073601}, where we do not include the recurrent portion of their proposed architecture since we train using static images rather than animated sequences as in \cite{Chaitanya:2017:IRM:3072959.3073601}. The resultant network is shown in figure \ref{fig:denoise} \tompson{Go through the entire paper and make sure you use \text{Figure~\ref{}} to reference figures... (not the Capital and tilde).}. 
 \begin{figure}[h!]
 \centering
 \includegraphics[width=1.0\columnwidth]{./assets/denoiser_diagram.pdf}
@@ -617,13 +479,15 @@ Knowing that noisy images are still useful for training, we leverage the informa
 \label{fig:denoise}
 \end{figure}
 
-The loss function used for denoising is Structured Similarity (SSIM)\cite{Wang04imagequality}. SSIM is typically used for image compression measurement, but also has been shown to be a good loss function for image comparison. The function for SSIM is given by
+The loss function we used for training the denouncing generative model is Structured Similarity (SSIM)\cite{Wang04imagequality}. SSIM is typically used for image compression measurement, but also has been shown to be a good loss function for image comparison. The function for SSIM is given by
 $$SSIM(p)=\frac{2\mu_x\mu_y + C_1}{\mu_x^2+\mu_y^2+C_1}\cdot\frac{2\sigma_{xy}+C_2}{\sigma_x^2+\sigma_y^2+C_2}$$
 where $\mu$ is the mean of the pixel $p$ computed with a Gaussian filter, $\sigma^2$ is the variance and $\sigma_{xy}$ is the covariance. SSIM can be thought of as having a combination of three different measures: a luminance comparison for an approximate average difference in brightness,  a contrast comparison which measures a difference in brightness variance, and finally a structure comparison which uses a ration between the covariance and variance of the two images.  See \cite{DBLP:journals/corr/ZhangSYSLJF16} and \cite{DBLP:journals/corr/ZhaoGFK15} for details.
 
-Denoising 1-sample images boosted accuracy from 57.21\% to 71.48\%, which is close to both 4 and 128 samples in performance while being much more accurate than other inexpensive rendering methods. Also, it is important to note that the rendering cost is two orders of magnitude lower than using the full sample count. 4 sample images, due to their low noise, only show a slight boost in performance.  The performance went from 72.89\% to 73.56\%.  The unadulterated 128 sample image achieved 74.84\%, which is only slightly better than the denoised low sample images.  Given that the denoising process takes milliseconds on a GPU \footnote{NVIDIA GeForce Titan X with 12GB or VRAM}, the cost of denoising is insignificant compared to taking more samples in a GI renderer.  See figure \ref{fig:differentsamplesraw} to see direct comparisons between images generated with different sample counts.
+Denoising 1-sample images boosted accuracy from 57.21\% to 71.48\%, which is close to both 4 and 128 samples in performance while being much more accurate than other inexpensive rendering methods. Also, it is important to note that the rendering cost is two orders of magnitude lower than using the full sample count. 4 sample images, due to their low noise, only show a slight boost in performance: 72.89\% to 73.56\%.  The unadulterated \tompson{This is not a thing. It is not in the vernacular of academic papers.} 128 sample image achieved 74.84\%, which is only slightly better than the denoised low sample images.  Given that the denoising process takes milliseconds on a GPU \footnote{NVIDIA GeForce Titan X with 12GB or VRAM}, the cost of denoising is insignificant compared to taking more samples in a GI renderer \tompson{State this FIRST before any other results. This is the important take away from this paragraph.}.  See figure \ref{fig:differentsamplesraw} to see direct comparisons between images generated with different sample counts.
 
 All of the results are listed in Table \ref{tblallrefined}.
+
+\tompson{Why are there 2 tables with this label?!}
 
 
 \begin{comment}
@@ -643,6 +507,8 @@ Accuracy       & 71.48\%       & 73.56\%       \\ \hline
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Train on SimGAN images}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\tompson{(citation missing) is the above subsection heading}
+
 \begin{comment}
 \begin{figure}[h!]
 \centering
@@ -652,26 +518,40 @@ Accuracy       & 71.48\%       & 73.56\%       \\ \hline
 \end{figure}
 \end{comment}
 
-Another synthetic data generation technique that we explored involved the use of Generative Adversarial Networks \cite{2014arXiv1409.7495G}.  We chose to use a modified form of the architecture used in \cite{DBLP:journals/corr/ShrivastavaPTSW16}.   SimGAN is a novel GAN\cite{goodfellow} model, loss and training method used to refine input images.  The goal of the paper was to take existing datasets that are images created by a real-time renderer and to try and make them more like photographs. They achieve this by having their GAN learn a refiner that would alter the pixel inputs based upon the discriminator being able to correctly classify the refined image as real (photo) or fake (synthetic).  The SimGAN authors were trying to do more than classification, so they had a local loss function tailored to prevent the labels from being altered.  They made other changes to the traditional GAN training methods in order to stabilize the training and prevent the generator from outputting something useless.  For instance, they used a regularization loss which penalized refined images that looked too different from the original and they used a buffer of recent images to train from as further training stabilization.
+Another synthetic data generation technique that we explored involved the use of Generative Adversarial Networks (GANs) \cite{2014arXiv1409.7495G}.  We chose to use a modified form of the SimGAN architecture used in \cite{DBLP:journals/corr/ShrivastavaPTSW16}.   \sout{SimGAN is a novel GAN citegoodfellow model, loss and training method used to refine input images.  The goal of the paper was to take existing datasets that are images created by a real-time renderer and to try and make them more like photographs. They achieve this by having their GAN learn a refiner that would alter the pixel inputs based upon the discriminator being able to correctly classify the refined image as real (photo) or fake (synthetic).  The SimGAN authors were trying to do more than classification, so they had a local loss function tailored to prevent the labels from being altered.  They made other changes to the traditional GAN training methods in order to stabilize the training and prevent the generator from outputting something useless.  For instance, they used a regularization loss which penalized refined images that looked too different from the original and they used a buffer of recent images to train from as further training stabilization.}
 
-We modified the SimGAN method for our experiments by removing the local loss function and changing the model architecture of both the refiner and discriminator.  But most importantly, we changed the input data.  Where SimGAN used synthetic image pixels as input, we pass in image pixels as well as parts of a g-buffer. Specifically, we pass in the normal data and depth buffers along with a rendered image.  
+\tompson{TODO fix the sout stuff.}
+
+We modified the SimGAN method for our experiments by removing the local loss function and changing the model architecture of both the refiner and discriminator.  But most importantly, we changed the training and test data domains.  Where SimGAN used synthetic image pixels as input, we pass in image pixels as well a g-buffer \tompson{I took out 'parts' of a g-buffer. That it's a sub-set is an implementation detail}. Specifically, we pass in the normal data and depth buffers along with a rendered image.  
+
+\tompson{The above paragraph looks way too much like you've just copied their stuff and modified it. This is even more true when you read through the last section where you also took someone else's method and modified it. Here's what I propose. Go through those 2 sections and state something like: "We propose an architecture inspired by [X]. We train a model bla bla bla, to do bla bla bla. Unlike [X] our model is bla." Without trying to take credit for their work, make sure you don't make it seem like you just keep using other people's ideas and don't draw attention to the fact that you're just using existing methods. This requires careful language but I assure you everyone does it.}
 %As there is a pre-training step where we run the the self regularization loss against the generator for a number of steps, this ends up pre-training the network to denoise the input image and learn shading.  Then during regular adversarial training this loss helps constrain the shading from drastically changing.  This is also actually a byproduct of the fact that the refiner network is not operating on pixels.
 
-The auxiliary information provided by the g-buffer and the dependence of shading upon normals(which cannot be modified) 
+Note that an interesting property of our rendering architecture is that by conditioning our generative model on a static g-buffer, and by ensuring that our shading function is dependent on geometry normals (which are not modified by the generative model and is physically motivated by the rendering equation) 
 %It has normals as part of the input and shading is highly dependent upon them and they are static during the entire training cycle.
 prevents the need for a local loss function and eliminates the problem of a GAN altering the labels of the objects being rendered.
 
-An important note is that the SimGAN paper's input rendered images didn't incorporate global illumination and were farther from real data than our dataset. This means they have more room for improvement in their dataset than in ours.  
+\tompson{I tried to spice up the last paragraph. I think it's important.}
+
+Additionally, in \cite{DBLP:journals/corr/ShrivastavaPTSW16} the input rendered images didn't incorporate global illumination and were farther from real data than our dataset. This means they have more room for improvement in their dataset than in ours. \tompson{Stop using "ours" and "they" it's to informal. "this work" and [X] is the proper way to phrase this. Please go through the whole paper and fix this. Also, I don't know what you mean by this last sentence. The fact that they don't condition on GI is not a BAD thing.}
 
 %Then, the regularization loss is a way to learn the shading just as in the denoising methods.
 
-\subsubsection{Training and finding the best single model} \label{sec:gans}
+\subsubsection{Training Methodology} \label{sec:gans}
+
+\tompson{Go through the paper and make sure all headings use the same format (caps on each word). I fixed the above heading, but there might be others I didn't notice.}
+
 The GAN architecture we employed was the following:
+
+\tompson{Move this to the previous section. There's no need for 2 sections here.}
+
 \begin{itemize}
-\item The modified refiner network was the same model used for denoising shown in figure \ref{fig:denoise}.  The inputs were normals, depth and either the 1, 4, 128 sample global illumination rendered image. Albedo was not used as an input for these experiments.
+\item The modified refiner network was the same model used for denoising \tompson{Refer to section} shown in figure \ref{fig:denoise}.  The inputs were normals, depth and either the 1, 4, 128 sample global illumination rendered image. Albedo was not used as an input for these experiments.
 \item The regularization loss was the SSIM loss used for denoising mentioned in section \ref{denoising}.
 \end{itemize}
-We pre-trained the refiner network for 2,000 steps using the SSIM loss against the 128 sample Mitsuba rendering before going into adversarial training.  This had the effect of having a partially differentiable renderer that learned to denoise and shade the scene from the g-buffer and image input.  This learned shading function was then adjusted through adversarial training for 100 or more epochs.  Each epoch, the refiner model was saved to a separate file so it could be used to refine and train a classifier in the next stage of our experiment.  One problem we experienced that the SimGAN authors did not was that our data already looked almost identical to the photographs. So utilizing their method of just visually inspecting the output of each refiner epoch and choosing the refiner model that ``looked most real'' would not work in our case. We tried the following to identify the best refiners:
+
+We pre-trained the refiner network for 2,000 steps using the SSIM loss against the 128 sample Mitsuba rendering before going into adversarial training \tompson{"going into" is informal! I guess I'm getting more picky because of the consistency of it up until this point. More importantly though, many of the details in this paragraph are thesis filler. Who cares how many epochs you trained for? It's an implementation detail.}.  This had the effect of having a partially differentiable renderer that learned to denoise and shade the scene conditioned on the g-buffer and image input \tompson{I've changed lots of references to this, but in future generative models are CONDITIONED on input samples. Use the language consistent with the literature.}.  This learned shading function was then adjusted through adversarial training for 100 or more epochs.  In each epoch, the refiner model was saved to a separate file so it could be used to refine and train a classifier in the next stage of our experiment \tompson{pointless detail. Or course it was.}.  One problem we experienced that the SimGAN authors did not was that our data already looked almost identical to the photographs \tompson{Rephrase this so that it reads more formal. Example: "Unlike in [X], our conditional data distribution is visually very similar to the target generated distribution. As such, we propose a more principled way to validate the performance of the GAN during training (the proposed method in [X] was to ``visually inspect'' the GAN output and early-stop training when, bla bla bla). }. So utilizing their \tompson{Fix this language. "their" is not formal.} method of just visually inspecting the output of each refiner epoch and choosing the refiner model that ``looked most real'' would not work in our case. We tried the following to identify the best refiners \tompson{Yeah, now it's REALLY looking like a collection of ``stuff you tried until something worked''. State the best method only, and in a one sentence footnote mention the other methods you tried that were less successful. Negative results are interesting, but never at the expense of clarity or if it makes this look like a class project ;-)}:
+
 \begin{itemize}
 \item Train a classifier on real training and validation data.  No test data is used in testing or training this classifier.  We will call this a clean classifier.
 \item For every saved GAN model, we run the synthetic training data through it and establish how well the clean classifier can classify the refined images. We use the classification accuracy to rank the GAN.
@@ -692,30 +572,30 @@ This effectively generates $N$ copies of the training data where each copy is un
 
 Using the method of ranking GANS using a clean classifier did not predict which models would actually create the best data. 
 
-However, taking the top 10 models ranked by our method, some outperform just using or denoising the input image.  Also, it is not obvious from looking at the output of a GAN at a given epoch if the data would do any better than using the denoised data.  So, this ranking method represents a principled way to choose models and proved to be useful in finding candidate GANS.
+However, taking the top 10 models ranked by our method, some outperform just using or denoising the input image.  Also, it is not obvious from looking at the output of a GAN at a given epoch if the data would do any better than using the denoised data \tompson{Too informal. What is obvious to you is not obvious to others. Rephrase this.}.  So, this ranking method represents a principled way to choose models and proved to be useful in finding candidate GANS.
 
 When evaluating performance of using a single GAN, we took each saved GAN and trained a classifier.  We repeated this three times and then kept the top performing model.   For every sample count we found a GAN that could outperform directly training on the original image or denoising it.
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=1.0\columnwidth]{./assets/128sampleGANComparison_75_26.png}
-\caption{Bottom: 128 sample Mitsuba passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between full sample the rendered image and the refined image. This particular GAN seems to have brightened up the object albedo and dramatically expanded the shadows.  The performance of using the output from this refiner was 75.26\%. and training directly off of the 128 sample target achieved 74.84\%.}
-\label{fig:GAN_128}
-\end{figure}
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=1.0\columnwidth]{./assets/128sampleGANComparison_75_26.png}
+% \caption{Bottom: 128 sample Mitsuba passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between full sample the rendered image and the refined image. This particular GAN seems to have brightened up the object albedo and dramatically expanded the shadows.  The performance of using the output from this refiner was 75.26\%. and training directly off of the 128 sample target achieved 74.84\%.}
+% \label{fig:GAN_128}
+% \end{figure}
 
 \begin{figure}[h!]
 \centering
-\includegraphics[width=1.0\columnwidth]{./assets/4sampleGANComparison_77_65.png}
-\caption{Bottom: 4 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sample rendered image and the refined image. This particular GAN seems to have brightened up the object albedo, denoised it, lightend it and expanded the shadows to the left.  The performance of using the output from this refiner was 77.65\%. and training directly off of the 4 sample target achieved 72.89\%.  Training off the denoised image achieved 73.56\%.}
+\includegraphics[width=1.0\columnwidth]{./assets/4sampleGAN-onerow.png}
+\caption{Right: 4 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Left: Absolute value difference between the full sample rendered image and the refined image. This particular GAN seems to have brightened up the object albedo, denoised it, lightend it and expanded the shadows to the left.  The performance of using the output from this refiner was 77.65\%. and training directly off of the 4 sample target achieved 72.89\%.  Training off the denoised image achieved 73.56\%.}
 \label{fig:GAN_4}
 \end{figure}
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=1.0\columnwidth]{./assets/1sampleGANComparison_72_84.png}
-\caption{Bottom: 1 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sampled rendered image and the refined image. This particular GAN seems to have brightened up the object albedo so much that it erased the top parts of the objects. It has denoised it and has darkened and expanded the shadows down and to the left.  The performance of using the output from this refiner was 72.84\%. and training directly off of the 1 sample target achieved 57.21\%.  Training off the denoised image achieved 71.48\%.}
-\label{fig:GAN_1}
-\end{figure}
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=1.0\columnwidth]{./assets/1sampleGANComparison_72_84.png}
+% \caption{Bottom: 1 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sampled rendered image and the refined image. This particular GAN seems to have brightened up the object albedo so much that it erased the top parts of the objects. It has denoised it and has darkened and expanded the shadows down and to the left.  The performance of using the output from this refiner was 72.84\%. and training directly off of the 1 sample target achieved 57.21\%.  Training off the denoised image achieved 71.48\%.}
+% \label{fig:GAN_1}
+% \end{figure}
 1 sample input GANs scored 72.84\% versus 71.48\% for denoising the same image. See figure \ref{fig:GAN_1} for more details.  The accuracy of the best 4 sample input GAN was 77.65\% versus 73.56\% when just denoised. This was the biggest improvement the GANs achieved versus denoising. See figure \ref{fig:GAN_4} for more details.  With the 128 sample input GAN the performance improved to 75.26\% from 74.84\%. See figure \ref{fig:GAN_128} for more details.
 \subsubsection{Training using multiple GANs} \label{sec:multigans}
 The next experiment is a little different from the rest, as we use more training data and is therefore not quite as comparable.  However, the amount of training data which that would have to be generated in a GI renderer remains the same.  The major change is that we use the GAN models from the top ten ranked epochs to create their own refined version of the data.
@@ -731,19 +611,27 @@ In other words, using 128-sample GI rendering is 78.77\% as effective as using r
 
 It is easy to see why this method works. We are creating a more diverse training dataset that has already been tested to be close to the domain of the real dataset.  However, there are diminishing returns.  Adding any more than 8 GANS did not result in better performance.  That may have to do with having a highly weighted regularization loss which prevented the GAN's refined images from deviating too far from the original rendering.  
 
+\section{Results}
+NOTE: still working on this
+\subsection{NORB}
+The results for the NORB dataset are shown in table \ref{table:tblnonGI}. Albedo Only yielded only 53.26\% accuracy. This tells us that while  Learned SH Shading is unshadowed shading. SH Shading + AO is unshadowed shading with AO composited with the result. See section \ref{sec:learned_sh} for more detail. 2 Bounce (Direct Lighting) is a shading plus shadowing that is described in section \ref{sec:2bounce}. $\Delta$ vs Real has two numbers: the left is the difference in accuracy from the best result of each method compared to using real data, and the right is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. Data augmentation was used in all of the above experiments except Real Images. 
 
+The baseline accuracy was 95.01\% accuracy and was achieved using NORB's photographic training set. Training without any shading only 
+\subsection{ShapeNet Results}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion and Future Work}
 \subsection{Conclusion}
 
-By using a special dataset consisting of the same scene in both synthetic and real images, we have been able to directly compare different image synthesis techniques and isolate performance differences due to shading.  We have shown that diffuse shading alone doesn't do much better than just using a silhouette, and shadows are important and outperform diffuse shading.  Most importantly, we have shown ways to approximate the effectiveness of the best GI rendering method and how to beat it,  and how to approximate full sample GI while using less computation. Furthermore, we have also shown that by using multiple GAN models you can beat GI simulation by a significant margin and approach the performance of using real data. 
+By constructing a novel dataset consisting of synthetic and real images with extremely high levels of geometry correspondence, we are able to directly compare various image synthesis techniques. We do so by measuring the domain-transfer classification accuracy of a multi-class image classifier as a proxy measure for ``image-realism'' as seen by \tompson{seen by is the wrong word, but I don't know what else to use...} a Convolutional Network architecture.  We have shown that diffuse shading alone gives similar performance to a simple silhouette image, and additionally that shadows (unsurprisingly) are important for domain transfer.  Most importantly, we presented a  ways to approximate the effectiveness of the best GI rendering method and how to beat it,  and how to approximate full sample GI while using less computation. Furthermore, we have also shown that by using multiple GAN models you can beat GI simulation by a significant margin and approach the performance of using real data. 
 
 \subsection{Future Work}
 
 Because the multiple GAN training model has shown the most promise, an interesting area to research next would be to predict ensembles able produce the best datasets before going through the trouble of training them.
 In the future, we intend to expand the dataset by re-photographing the objects and capturing a light probe.  That way, we can eliminate the difference in lighting conditions between the real and the fake images and allow the performance of different shading methods to be more accurately measured.
+\tompson{Remove this entire section. Explicit "Future work" sections are more or less out of fashion now. If you really want to add this content, add it inline in the body of the paper.}
+
 \begin{comment}
 \begin{itemize}
 \item  Learn lighting in real data using SH network and using unsupervised adversarial training with unlabeled real images... with a single lighting condition.
