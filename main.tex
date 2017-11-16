@@ -25,7 +25,7 @@
 % run, let it finish, and you should be clear).
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
 
-\cvprfinalcopy % *** Uncomment this line for the final submission
+%\cvprfinalcopy % *** Uncomment this line for the final submission
 
 \def\cvprPaperID{3265} % *** Enter the CVPR Paper ID here
 \def\httilde{\mbox{\tt\raisebox{-.5ex}{\symbol{126}}}}
@@ -40,7 +40,8 @@
 \ifcvprfinal\pagestyle{empty}\fi
 \begin{document}
 %%%%%%%%% TITLE
-\title{Experiments in Deferred Shading for Training Image Classifiers \tompson{I really don't like the title. Lets chat in person.}}
+%\title{Experiments in Deferred Shading for Training Image Classifiers \tompson{I really don't like the title. Lets chat in person.}}
+\title{Beyond Photo Realism For Domain Adaptated Synthetic Data}
 
 \author{Kristofer Schlachter\\
 NYU\\
@@ -92,7 +93,7 @@ Applying deep learning to supervised computer vision tasks commonly requires lar
 
 This work explores the effectiveness of various rendering methods, which range from very low to very high computational cost. We compare multiple synthetic rendering methods with the performance obtained using "real" data distribution as an optimal baseline. This is made possible since we annotate an existing image classification dataset (NORB \cite{LeCun:2004:LMG:1896300.1896315}) with pixel aligned geometry labels obtained using a high-quality photometric scanner. We represent the geometry and material information of the RGB scene using a "Geometry Buffer" or "g-buffer", which gives us a standard set of 3D scenes where geometric transformations are frozen in place. By using a g-buffer, we isolate the physical process of shading a surface from the geometric process of geometry pose and projection.  The shading process is also isolates from camera parameters including location, orientation and field of view. This allows us to directly compare different rendering methods and enables us to isolate any performance difference due to shading alone.
 
-Capitalizing on this standard 3D scene representation we setup a number of experiments to compare rendering methods of increasing sophistication and computational cost.  We then measure the benefit of adding certain rendering techniques and see if the computational cost can be justified.  These experiments measure the relative importance of image rendering features. We use a full GI 128 sample rendering via Mitsuba as the method whose performance we sought to match or surpass.
+Capitalizing on this standard 3D scene representation we setup a number of experiments to compare rendering methods of increasing sophistication and computational cost.  We then measure the benefit of adding certain rendering techniques and see if the computational cost can be justified.  These experiments measure the relative importance of image rendering features. We use a full GI rendering via Mitsuba as the method whose performance we sought to match or surpass.
 We are able to do this by using non-standard rendering techniques that involve using convolutional neural nets to learn shading functions.  This is a form of differentiable rendering where the shading is differentiable. Effectively, we use learned shading to denoise low sample count GI rendering and compared it to high sample count images.  We also explored the refining technique in \cite{DBLP:journals/corr/ShrivastavaPTSW16}, and we extend it to use g-buffers and other performance enhancing modifications.
 
 \subsection{Contributions}
@@ -129,10 +130,10 @@ Zhang et al. \cite{DBLP:journals/corr/ZhangSYSLJF16} use a custom created large 
 
 
 %Model-driven Simulations for Deep Convolutional Neural Networks 
-Veeravasarapu et al. \cite{DBLP:journals/corr/VeeravasarapuRR16} discuss Monte Carlo methods for generating synthetic data, and they examine several different simulated datasets. They tested various different levels of fidelity (measured in samples-per-pixel) and concluded that beyond a certain threshold (40 spp for their specific scenes), increases in rendering fidelity do not increase the data training accuracy. We build upon this result by using learning-based methods to improve the accuracy of visual fidelity for lower sample counts.
+%REMOVING BECAUSE OF SPACE:Veeravasarapu et al. \cite{DBLP:journals/corr/VeeravasarapuRR16} discuss Monte Carlo methods for generating synthetic data, and they examine several different simulated datasets. They tested various different levels of fidelity (measured in samples-per-pixel) and concluded that beyond a certain threshold (40 spp for their specific scenes), increases in rendering fidelity do not increase the data training accuracy. We build upon this result by using learning-based methods to improve the accuracy of visual fidelity for lower sample counts.
 
 % How useful is photo-realistic rendering for visual learning? 
-Movshovitz-Attias et al. \cite{DBLP:journals/corr/Movshovitz-Attias16} demonstrated that synthetic data produced by a high-quality renderer, when added to a dataset of natural images, can produce training accuracies that are competitive with a larger dataset of real data. Their work focused on rendering parameters, such as lighting positions, background, and camera shutter speed. As opposed to these variables, our work focuses on different methods of rendering light interaction and propagation.
+%REMOVING BECAUSE OF SPACE:Movshovitz-Attias et al. \cite{DBLP:journals/corr/Movshovitz-Attias16} demonstrated that synthetic data produced by a high-quality renderer, when added to a dataset of natural images, can produce training accuracies that are competitive with a larger dataset of real data. Their work focused on rendering parameters, such as lighting positions, background, and camera shutter speed. As opposed to these variables, our work focuses on different methods of rendering light interaction and propagation.
 
 %Playing for Data: Ground Truth from Computer Games
 %Play and Learn: Using Video Games to Train Computer Vision Model 
@@ -209,7 +210,7 @@ In an environment with only large area light sources, there exists a simple firs
 \subsubsection{Global Illumination}\label{mitsuba_section}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (such as real-time rasterization-based renderers).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset is diffuse and there are few surfaces capable of reflecting light onto the objects in the scene. We made this decision to avoid the typical thousands of iterations necessary to get a noise free image. \footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
+Global illumination (GI) refers to rendering methods that take into account inter-surface reflection, to significantly improved visual fidelity in comparison to faster approximate methods that only simulate direct lighting (such as real-time rasterization-based renderers).  GI derives its accuracy from its ability to take into account the light that arrives at a surface not just directly from a light source, but from light that has been reflected off of other surfaces as well. Different surface materials have different reflection characteristics that effect how much sampling must be done in order to converge to the right solution. We chose a classification dataset with homogeneous and simple material properties, such that all of the dataset is diffuse and there are few surfaces capable of reflecting light onto the objects in the scene. We made this decision to avoid the typical thousands of iterations necessary to get a noise free image\footnote{Usually for scenes with highly reflective surfaces and small bright light sources}.
 
 In order to simulate global illumination in our experiments, we used the open source global illumination renderer, Mitsuba.  It generates high quality images that it creates by solving the rendering equation by bouncing many light rays throughout the 3D scene.  The more samples it takes, the closer to the solution and the more realistic the image becomes, but at the cost of high computation; images rendered by Mitsuba often take many orders of magnitude longer than with rasterization methods such as ones included in OpenGL.  
 
@@ -241,9 +242,7 @@ The NORB dataset consists of a set of 50 toys split into a 25 object training se
 After acquiring the objects, we used the HP 3D Structured Light Scanner Pro S3\cite{HPSCANNER} to scan in the objects. The models were then uniformly scaled to fit into a unit cube with the bottom center at the origin. We then rendered a matching g-buffer for every image in the training dataset.  
 
 Mitsuba produced the G-Buffers and shaded images at a resolution of 768x768 for each image.  The images and buffers were then cropped and resized such that the bounding box of the mesh pixels fit into an 80x80 pixel square, with the final image itself being a 96x96 pixel square. This mirrors the procedure done for the source NORB dataset. This creation procedure results in a one-to-one mapping between each image in the synthetic training dataset with the corresponding ``real'' image in the NORB training dataset.
-
 %As briefly mentioned, the NORB dataset does have its shortcomings when compared to recent deep-learning datasets of significantly larger size. The dataset is black and white, low resolution, has very little visual variety and it small in number of samples. While these are drawbacks, the dataset was generated using a controlled capture environment, which helps us eliminate variables such as bad lighting or background noise when evaluating our learning model. Therefore, we can conduct experiments comparing only rendering variables, such as lighting, rendering methods, and more. These conditions are detailed later.
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsubsection{Shapenet Dataset}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -266,7 +265,7 @@ After each model was changed to fit the above conditions, they were then rendere
 \section{Experiments}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-In our experiments, we use increasingly complex simulation methods for rendering our images.  We start with just a silhouette as training data and we then incrementally increase the sophistication level of the simulation during rendering.  We then add complexity such as shading, shadowing and global illumination. Finally, we use a form of a denoising autoencoder to learn cleanup and refine GI based images \footnote{See figure \ref{fig:denoise} and section \ref{denoising} for denoiser details}.
+In our experiments, we use increasingly complex simulation methods for rendering our images.  We start with just a silhouette as training data and we then incrementally increase the sophistication level of the simulation during rendering.  We then add complexity such as shading, shadowing and global illumination. Finally, we use a form of a denoising autoencoder to learn cleanup and refine GI based images.% \footnote{See figure \ref{fig:denoise} and section \ref{denoising} for denoiser details}.
 
 In order to principally measure the impact of these various techniques, we use a single classifier architecture across all experiments; a simplification of the VGG network\cite{DBLP:journals/corr/SimonyanZ14a}. Given the small size of our datasets, we reduce the standard VGG network to 8 learnable layers, including 5 convolutional and 3 fully-connected layers. We then use a cross-entropy loss (i.e. negative log likelihood) to train the 5-class output. See 
 Figure~\ref{fig:VGG_DAIGRAM} for an overview of this architecture.
@@ -283,7 +282,7 @@ The first experiment done for a dataset is to train a classifier with data that 
 
 This establishes a target classifier accuracy to be used for measuring the induced accuracy of using the training data created by the rendering methods used in this work. Next, we conduct multiple experiments by varying rendering parameters and measuring their quantitative impact on classifier performance.
 
-Next, we use renders that use no shading by taking the albedo maps of each image generated in the g-buffer and using this to train our dataset. We then test this against our baseline generated in the first experiment and compare the results. The output images can be seen in figure \ref{fig:GBUFFER_ALBEDO}
+Next, we use renders that use no shading by taking the albedo maps of each image generated in the g-buffer and using this to train our dataset. We then test this against our baseline generated in the first experiment and compare the results. The output images can be seen in figure \ref{fig:GBUFFER_ALBEDO}.
 
 \begin{figure}[h!]
 \centering
@@ -325,7 +324,7 @@ We test on three different sample counts for each of our datasets to determine h
 \caption{Architecture of Denoising Model}
 \label{fig:denoise}
 \end{figure}
-Given that the low-sample GI renders take far less time than the high-sample renders, we next experiment to see if the lower sample count images can be denoised using a simplified version of the denoising auto-encoder with skip connections inspired by \cite{Chaitanya:2017:IRM:3072959.3073601}. %We modify this auto-encoder to remove the recurrent portion of the proposed architecture, as we train using static images rather than animated sequences. 
+Given that the low sample GI renders take far less time than the high sample renders, we next experiment to see if the lower sample count images can be denoised using a simplified version of the denoising auto-encoder with skip connections inspired by \cite{Chaitanya:2017:IRM:3072959.3073601}. %We modify this auto-encoder to remove the recurrent portion of the proposed architecture, as we train using static images rather than animated sequences. 
 The network architecture is shown in \ref{fig:denoise}. %For this network, we use the Structured Similarity (SSIM) loss function \cite{Wang04imagequality}, a loss function that has proven to be useful for both image-compression measurement and also image comparison. 
 %TODO: do we need the long explanation in the paper...?
 %See \cite{DBLP:journals/corr/ZhangSYSLJF16} and \cite{DBLP:journals/corr/ZhaoGFK15} for details. 
@@ -342,46 +341,20 @@ Another synthetic data generation technique that we explored involved the use of
 %It has normals as part of the input and shading is highly dependent upon them and they are static during the entire training cycle.
 prevents the need for a local loss function and eliminates the problem of a GAN altering the labels of the objects being rendered.
 %We modified the SimGAN method for our experiments by removing the local loss function and changing the model architecture of both the refiner and discriminator.  But most importantly, we changed the training and test data domains.  Where SimGAN used synthetic image pixels as input, we pass in image pixels as well a g-buffer \tompson{I took out 'parts' of a g-buffer. That it's a sub-set is an implementation detail}. Specifically, we pass in the normal data and depth buffers along with a rendered image.  
-
 %\tompson{The above paragraph looks way too much like you've just copied their stuff and modified it. This is even more true when you read through the last section where you also took someone else's method and modified it. Here's what I propose. Go through those 2 sections and state something like: "We propose an architecture inspired by [X]. We train a model bla bla bla, to do bla bla bla. Unlike [X] our model is bla." Without trying to take credit for their work, make sure you don't make it seem like you just keep using other people's ideas and don't draw attention to the fact that you're just using existing methods. This requires careful language but I assure you everyone does it.}
 %As there is a pre-training step where we run the the self regularization loss against the generator for a number of steps, this ends up pre-training the network to denoise the input image and learn shading.  Then during regular adversarial training this loss helps constrain the shading from drastically changing.  This is also actually a byproduct of the fact that the refiner network is not operating on pixels.
-
-
 %\tompson{I tried to spice up the last paragraph. I think it's important. But it needs more work.}
-
 %Additionally, in \cite{DBLP:journals/corr/ShrivastavaPTSW16} the input rendered images didn't incorporate global illumination and were farther from real data than our dataset. This means they have more room for improvement in their dataset than in ours. \tompson{Stop using "ours" and "they" it's to informal. "this work" and [X] is the proper way to phrase this. Please go through the whole paper and fix this. Also, I don't know what you mean by this last sentence. The fact that they don't condition on GI is not a BAD thing.}
-
 %Then, the regularization loss is a way to learn the shading just as in the denoising methods.
-
-
 The GAN architecture we employed was the following:  
 The generative network was the same model used for denoising shown in figure \ref{fig:denoise}.  The inputs were normals, depth and either the low, medium and high sample global illumination rendered image. Albedo was used for only ShapeNet data based experiments. The regularization loss was SSIM.
 
-Pre-trained the refiner network against the high sample Mitsuba rendering before starting adversarial training trained a partially differentiable renderer that learned to denoise and shade the scene conditioned on the g-buffer and image input. One problem we experienced that the SimGAN authors did not was that our data already looked almost identical to the photographs \tompson{Rephrase this so that it reads more formal. Example: "Unlike in [X], our conditional data distribution is visually very similar to the target generated distribution. As such, we propose a more principled way to validate the performance of the GAN during training (the proposed method in [X] was to ``visually inspect'' the GAN output and early-stop training when, bla bla bla). }. So utilizing their \tompson{Fix this language. "their" is not formal.} method of just visually inspecting the output of each refiner epoch and choosing the refiner model that ``looked most real'' would not work in our case. We tried the following to identify the best refiners \tompson{Yeah, now it's REALLY looking like a collection of ``stuff you tried until something worked''. State the best method only, and in a one sentence footnote mention the other methods you tried that were less successful. Negative results are interesting, but never at the expense of clarity or if it makes this look like a class project ;-)}:
+Pre-training the generative network against the high sample Mitsuba rendering before starting adversarial training trained a partially differentiable renderer that learned to denoise and shade the scene conditioned on the g-buffer and image input. Unlike in \cite{DBLP:journals/corr/ShrivastavaPTSW16}, our conditional data distribution is visually very similar to the target generated distribution. As such, we propose a more principled way to validate the performance of the GAN during training (the proposed method in \cite{DBLP:journals/corr/ShrivastavaPTSW16} was to ``visually inspect'' the GAN output and early-stop training when, the output visually resembled the target dataset). To choose a GAN to generate training data we train a classifier on real training and validation data.  No test data is used in testing or training this classifier.  We will call this a clean classifier. For every saved GAN model, we run the synthetic training data through it and establish how well the clean classifier can classify the refined images. We use the classification accuracy to rank the GAN. Take the top 10 GAN refiner models that were ranked from clean classifier and for each one train a classifier on the full dataset. For using multiple GAN models (described below) we take the set of top 10 ranked refiners from the clean classifier and train a classifier with a subset of the refiners synthesizing a new expanded dataset for 200 epochs.
 
-\begin{itemize}
-\item Train a classifier on real training and validation data.  No test data is used in testing or training this classifier.  We will call this a clean classifier.
-\item For every saved GAN model, we run the synthetic training data through it and establish how well the clean classifier can classify the refined images. We use the classification accuracy to rank the GAN.
-%\item Take a reduced dataset that only has two elevations and five azimuths for each model in the training dataset (250 images) and run all 100+ GAN refiner models saved for 50 epochs and then rank how they performed in training a classifier that has a test set of the same elevations and azimuths (250 images).
-\item We take the top 10 GAN refiner models that were ranked from clean classifier and for each one train a classifier on the full dataset for 200 epochs.  
-\item For using multiple GAN models (described below) we take the set of top 10 ranked refiners from the clean classifier and train a classifier with a subset of the refiners synthesizing a new expanded dataset for 200 epochs. The expanded dataset is created by the following method:
-\begin{itemize}
-\item Create a new empty training set.
-\item For each refiner in the set of refiners:
-\begin{itemize}
-\item Refine each image in the original full training set and append it to the new training set.
-\end{itemize}
-\item The new dataset is comprised of $D * N$ images where $N$ is the number of refiners and $D$ is the dataset size.
-\end{itemize}
-\end{itemize}
-
+The expanded dataset is created by the following method: Create a new empty training set. For each generative model in the set of refiners; refine each image in the original full training set and append it to the new training set. The new dataset is comprised of $D * N$ images where $N$ is the number of refiners and $D$ is the dataset size.
 This effectively generates $N$ copies of the training data where each copy is unique and without the computational overhead of a full render to synthesize the images.
 
-Using the method of ranking GANS using a clean classifier did not predict which models would actually create the best data. 
-
-However, taking the top 10 models ranked by our method, some outperform just using or denoising the input image.  Also, it is not obvious from looking at the output of a GAN at a given epoch if the data would do any better than using the denoised data \tompson{Too informal. What is obvious to you is not obvious to others. Rephrase this.}.  So, this ranking method represents a principled way to choose models and proved to be useful in finding candidate GANS.
-
-When evaluating performance of using a single GAN, we took each saved GAN and trained a classifier.  We repeated this three times and then kept the top performing model.   For every sample count we found a GAN that could outperform directly training on the original image or denoising it.
+Taking the top 10 models ranked by our method, some outperform just using or denoising the input image.  This method of choosing a GAN allows for choosing a model that outputs non-photorealistic images and represents a principled way to choose models independent from the realism of their generated input.  When evaluating performance of using a single GAN, we took each saved GAN and trained a classifier.  We repeated this three times and then kept the top performing model. For every sample count we found a GAN that could outperform directly training on the original image or denoising it.
 
 % \begin{figure}[h!]
 % \centering
@@ -393,7 +366,7 @@ When evaluating performance of using a single GAN, we took each saved GAN and tr
 \begin{figure}[h!]
 \centering
 \includegraphics[width=1.0\columnwidth]{./assets/4sampleGAN-onerow.png}
-\caption{Right: 4 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Left: Absolute value difference between the full sample rendered image and the refined image. This particular GAN seems to have brightened up the object albedo, denoised it, lightend it and expanded the shadows to the left.}
+\caption{Right: 4 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Left: Absolute value difference between the full sample rendered image and the refined image. Notice that the image is no longer photo-realistic.}
 \label{fig:GAN_4}
 \end{figure}
 
@@ -403,25 +376,26 @@ When evaluating performance of using a single GAN, we took each saved GAN and tr
 % \caption{Bottom: 1 sample Mitsuba image passed into GAN, Middle: Output of refiner.  Top: Absolute value difference between the full sampled rendered image and the refined image. This particular GAN seems to have brightened up the object albedo so much that it erased the top parts of the objects. It has denoised it and has darkened and expanded the shadows down and to the left.  The performance of using the output from this refiner was 72.84\%. and training directly off of the 1 sample target achieved 57.21\%.  Training off the denoised image achieved 71.48\%.}
 % \label{fig:GAN_1}
 % \end{figure}
-1 sample input GANs scored 72.84\% versus 71.48\% for denoising the same image. See figure \ref{fig:GAN_1} for more details.  The accuracy of the best 4 sample input GAN was 77.65\% versus 73.56\% when just denoised. This was the biggest improvement the GANs achieved versus denoising. See figure \ref{fig:GAN_4} for more details.  With the 128 sample input GAN the performance improved to 75.26\% from 74.84\%. See figure \ref{fig:GAN_128} for more details.
+\begin{comment}
+\edit{MOVE TO RESULTS: 1 sample input GANs scored 72.84\% versus 71.48\% for denoising the same image. See figure \ref{fig:GAN_1} for more details.  The accuracy of the best 4 sample input GAN was 77.65\% versus 73.56\% when just denoised. This was the biggest improvement the GANs achieved versus denoising. See figure \ref{fig:GAN_4} for more details.  With the 128 sample input GAN the performance improved to 75.26\% from 74.84\%. See figure \ref{fig:GAN_128} for more details.}
+\end{comment}
 \subsubsection{Training using multiple GANs} \label{sec:multigans}
-The next experiment is a little different from the rest, as we use more training data and is therefore not quite as comparable.  However, the amount of training data which that would have to be generated in a GI renderer remains the same.  The major change is that we use the GAN models from the top ten ranked epochs to create their own refined version of the data.
+The next experiment is a little different from the rest, as more training data is used and is therefore not quite as comparable.  However, the amount of training data which that would have to be generated in a GI renderer remains the same.  The major change is that the use of the top ten ranked GAN models to create multiple refined version of the data.
 
 The new dataset is an aggregation of the different refined datasets.  The costly pre-rendering of the input images is not changed and the run-time rendering refinement is longer but insignificant compared to GI rendering time.  In our experiments, it took a minute longer to generate 10 times as much data by running the dataset through ten GANS on an NVIDIA Titan X Maxwell GPU. %Even better, the GANs are already there from the training phase and the ranking is already being done. 
-The added time for using this method is negligible except for extra time required to train on a larger dataset.
+The added time for using this method is negligible except for extra time required to train on a larger dataset. This ensemble of GANs is another method in this work that distinguishes it from \cite{Bousmalis2016UnsupervisedPD}.
 
-The resulting performance was significantly better than the best quality GI render, denoising or single GAN output.  The best multi-GAN performance for 1-sample data was 85.23\% using 4 GANs.  For 4-sample data, the best performance came from using 7 GANs and scored 84.37\%. This is close to reducing the error between the best GI rendering and real data by half. Using 128-samples data 7 GANs scored 87.33\%. This reduced the difference between training on real data and the best rendering method by more than half!
+\begin{comment}
+\edit{MOVE TO RESULTS: The resulting performance was significantly better than the best quality GI render, denoising or single GAN output.  The best multi-GAN performance for 1 sample data was 85.23\% using 4 GANs.  For 4-sample data, the best performance came from using 7 GANs and scored 84.37\%. This is close to reducing the error between the best GI rendering and real data by half. Using 128-samples data 7 GANs scored 87.33\%. This reduced the difference between training on real data and the best rendering method by more than half!
 
-In other words, using 128-sample GI rendering is 78.77\% as effective as using real data\footnote{74.84 is 78.77\% of 95.01}.  When you use this measure, a single GAN can boost the effectiveness of synthetic data to 80.01\% of real data.  When an ensemble of GANS is used the synthetic data generated is 91.92\% as effective as real data. 
-
+In other words, using 128-sample GI rendering is 78.77\% as effective as using real data\footnote{74.84 is 78.77\% of 95.01}.  When you use this measure, a single GAN can boost the effectiveness of synthetic data to 80.01\% of real data.  When an ensemble of GANS is used the synthetic data generated is 91.92\% as effective as real data.
 %We have found that you can use a lower sample count image and boost it with a the byproducts of GAN training and reduce the gap between the most realistic rendering methods and real data by half, and slightly more so if you use a high sample count render.  Furthermore, because it is using the byproducts of normal GAN training, it is not more expensive to create the models for this method. The differences in computation are the up front dataset generation from the output of multiple GAN models and having to train on a larger dataset.\\
 
 It is easy to see why this method works. We are creating a more diverse training dataset that has already been tested to be close to the domain of the real dataset.  However, there are diminishing returns.  Adding any more than 8 GANS did not result in better performance.  That may have to do with having a highly weighted regularization loss which prevented the GAN's refined images from deviating too far from the original rendering.  
-
-\tompson{It's worth mentioning Konstantinos' paper again here just to draw the comparisons. You don't want reviewers skimming over the related work (which they will) and then thinking your method is just a rehash of }
-
+}
+\end{comment}
 \section{Results}
-NOTE: still working on this
+We now examine the results from our previous experiments. As the patterns in results between the NORB and Shapenet datasets were very similar, we will first detail the NORB results, and then use the Shapenet results to validate these findings.
 \begin{table}[]
 \centering
 \begin{tabular}{|l|r|r|}
@@ -446,27 +420,31 @@ The results for the NORB dataset are shown in table \ref{table:tblnonGI}. Albedo
 
 We observe slight improvements once shadows are added. AO, our first approximation to shadows, scored at 60.89\% accuracy, a significant jump from renders without shadows. Then, once we improved the quality of shadows with the 2-bounce rendering method, we saw another significant jump to 66.89\% accuracy. However, this is still far less than our target baseline.
 
-\begin{table*}[]
+\begin{table}[]
 \centering
 \begin{tabular}{|l|r|r|r|r|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Input}}
-& \multicolumn{1}{c|}{\textbf{1 Sample}}
-& \multicolumn{1}{c|}{\textbf{4 Sample}}
-& \multicolumn{1}{c|}{\textbf{128 Sample}}
-& \multicolumn{1}{c|}{\textbf{Baseline \%}} \\ \hline
-Mitsuba		& 64.44\%	& 73.13\%	& 74.74\%	& 78.67\% \\
-Denoised	& 71.48\%	& 73.56\%	& N/A 		& 77.42\%	\\
-Single GAN	& 72.84\%	& 77.65\% 	& 75.26\%	& 81.73\%	\\
-Multiple GAN& 85.23\%	& 84.37\% 	& 87.33\% 	& 91.92\%		\\ \hline
+& \multicolumn{1}{c|}{\textbf{Low}}
+& \multicolumn{1}{c|}{\textbf{Medium}}
+& \multicolumn{1}{c|}{\textbf{High}}
+& \multicolumn{1}{c|}{\textbf{Baseline}} \\ \hline
+Mitsuba& 64.44\%	& 73.13\%	& 74.74\%	& 78.67\% \\
+Denoised& 71.48\%	& 73.56\%	& N/A 		& 77.42\%	\\
+GAN& 72.84\%	& 77.65\% 	& 75.26\%	& 81.73\%	\\
+Ensemble& 85.23\%	& 84.37\% 	& 87.33\% 	& 91.92\%		\\ \hline
 \multicolumn{5}{|c|}{\textbf{Performance of GI Rendered Refined Images}}	\\ \hline
 \end{tabular}
 \caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs.}
 %\caption{Comparison of GI Rendered Refined Image Performance. The GAN output refers to if only one GAN was used to refine the dataset or if the dataset was expanded by multiple GANs\tompson{What GAN output? This is the first time your mentioning GANs. Never, ever, ever, ever (times infinity + 1) show results for a term, model, experiment, etc without first describing it. For this reason, I would move this table WAY down a few pages on.}. $\Delta$ \tompson{IMO, I find this notation confusing. "Performance loss" would be a better column heading.} vs Real has two numbers \tompson{Yes, this is confusing. Pick one of these to show (it's redundant to have both). Simple is better.}. The left is the difference in accuracy from the best result of each method compared to using real data (Real achieved \textbf{95.01\%}). See section \ref{sec:gans} for further details.  The second number is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. See section \ref{sec:multigans} for more details \tompson{Rule of thumb: a reader should have already read all information they need to understand your results}. Bold values represent values that are better than the accuracy of the best quality GI rendering (128 Sample Mitsuba) \tompson{Remove the bold highlighting.}. Data augmentation was used for the Mitsuba experiments. \tompson{caption is too long. Move some content into body text.}}
-\label{tblallrefined}
-\end{table*}
+\label{table:tblallrefined}
+\end{table}
 
-We next observe the results of the more advanced techniq
+We next observe the results of the more advanced techniques, such as using GI rendering at a high sample count, denoising a low sample count GI rendering, and learning to render using GANs. These results can be observed in table \ref{table:tblallrefined}. While noisy (low sample) GI renders had poor performance, ranking close to the 2-bounce condition we observed earlier, the highest sample GI render achieved 74.74\% accuracy, almost 10\% higher. However, the medium sample count renders performed almost as well as the high sample count renders, demonstrating that beyond a certain quality threshold, the increase in accuracy becomes marginal. 
+
+We can further close the gap between the high sample count renders and the lower sample count renders with the denoising auto-encoder, which brought the 1 sample images to 71.48\% and the 4 sample images to 73.56\% accuracy, less than 1\% difference to the 128 sample render. We can therefore conclude that images could be rendered much faster at low samples, processed with a denoising auto-encoder, and achieve very comparable classification accuracies with a much lower render time.
+
+Finally, we can see that the images generated using the GANs detailed above had a better performance than any other result. With a single GAN, we achieve 75.26\% classification accuracy, which is only a slight increase over the best GI render results. However, with an ensemble of GANs, we were able to achieve an accuracy of 87.33\%, over 90\% of what one can achieve training with real photographic data.
 %Learned SH Shading is unshadowed shading. SH Shading + AO is unshadowed shading with AO composited with the result. See section \ref{sec:learned_sh} for more detail. 2 Bounce (Direct Lighting) is a shading plus shadowing that is described in section \ref{sec:2bounce}. $\Delta$ vs Real has two numbers: the left is the difference in accuracy from the best result of each method compared to using real data, and the right is the percentage of the real data trained classifier's accuracy that the method achieves.  100\% would mean that the method would have achieved 95.01\% accuracy when training a classifier. Data augmentation was used in all of the above experiments except Real Images. 
 \subsection{Shapenet Results}
 
@@ -488,33 +466,39 @@ Learned SH Shading			&47.80\%	& 56.91\%	\\
 \label{table:tblnonGI_sn}
 \end{table}
 
-
-\begin{table*}[]
+\begin{table}[]
 \centering
 \begin{tabular}{|l|r|r|r|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Input}}
-& \multicolumn{1}{c|}{\textbf{10 Sample}}
-& \multicolumn{1}{c|}{\textbf{32 Sample}}
+& \multicolumn{1}{c|}{\textbf{Low}}
+& \multicolumn{1}{c|}{\textbf{Medium}}
 %& \multicolumn{1}{c|}{\textbf{128 Sample}}
 & \multicolumn{1}{c|}{\textbf{Baseline \%}} \\ \hline
 Mitsuba		& 81.68\%	& 82.30\%	& 97.99\% \\
 Denoised	& 78.06\%	& 79.12\%	& 96.25\%	\\
-Single GAN	& 83.48\%	& 83.59\%	& \textbf{99.52\%}	\\
-Multiple GAN& 86.48\%	& 86.65\% 	& \textbf{103.17\%}		\\ \hline
+GAN	& 83.48\%	& 83.59\%	& \textbf{99.52\%}	\\
+Ensemble& 86.48\%	& 86.65\% 	& \textbf{103.17\%}		\\ \hline
 \multicolumn{4}{|c|}{\textbf{Performance of GI Rendered Refined Images}}	\\ \hline
 \end{tabular}
 \caption{Scores using the Shapenet dataset. Note that the Multiple GAN method performs better than the highest sample render.
 %Data augmentation was not used for the experiments listed above.
 }
-\label{tblallrefined}
-\end{table*}
+\label{table:tblallrefined_sn}
+\end{table}
+
+The Shapenet results follow very similar patterns to the NORB dataset, as seen in table \ref{table:tblnonGI_sn}. We can see that with the unshaded or learned SH shading models, the classification accuracies are very poor, approximately half of our baseline. Once we move to 2-bounce lighting with shadows, this becomes much closer. We can account for the relatively larger jump in performance when adding shadows compared to NORB because the lighting conditions between the 2-bounce render for Shapenet were much more similar to the target renders than in the case with the NORB 2-bounce renders and their target. %TODO: this last sentence is kind of a run-on.. it got away from me!
+
+Similarly, due to the nearly identical lighting conditions, we can see in table \ref{table:tblallrefined_sn}, the lower sample renders performed nearly as well as the 1024 sample renders that were used as the baseline. Interestingly, the denoiser reduced classification accuracy. This suggests that the lower sample renders were so similar to the baseline, that even the auto-encoder that attempted to remove noise added artifacts that reduced performance. % TODO: Kris check this, I'm not 100% sure it's right
+
+However, where we see the best performance is when we render with GANs, much like NORB. With a single GAN, we achieve 83.59\% classification accuracy, or 99.52\% of our baseline. When we used an ensemble of GANs, we achieve 86.65\% accuracy, which is even more accurate than our baseline. This means that the GAN-rendered models are as good or better for image classification than the photorealistic, 1024-sample GI renders.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
 
-By constructing a novel dataset consisting of synthetic and real images with extremely high levels of geometry correspondence, we are able to directly compare various image synthesis techniques and their impact on domain-adaptation. We do so by measuring the domain-transfer classification accuracy of a multi-class image classifier as a proxy measure for ``image-realism'' as seen by \tompson{seen by is the wrong word, but I don't know what else to use...} a Convolutional Network classifier architecture.  We have shown that diffuse shading alone gives similar performance to a simple silhouette image, and that shadows (unsurprisingly) are important for domain transfer.  Most importantly, we proposed two methods to approximate the effectiveness of offline global-illumination rendering, and whose domain adaptation performance actually exceeds it \tompson{Summarize the 2 methods. Denoising and GAN.}. Furthermore, we have also shown that by using multiple GAN models you can beat GI simulation by a significant margin and approach the performance of using real data. \tompson{Change "Multiple GANs" to "ensemble".}
+By constructing a novel dataset consisting of synthetic and real images with extremely high levels of geometry correspondence, we are able to directly compare various image synthesis techniques and their impact on domain-adaptation. We do so by measuring the domain-transfer classification accuracy of a multi-class image classifier as a proxy measure for ``image-realism'' as seen by \tompson{seen by is the wrong word, but I don't know what else to use...} a Convolutional Network classifier architecture.  We have shown that diffuse shading alone gives similar performance to a simple silhouette image, and that shadows (unsurprisingly) are important for domain transfer.  Most importantly, we proposed two methods to approximate the effectiveness of offline global-illumination rendering, and whose domain adaptation performance actually exceeds it \tompson{Summarize the 2 methods. Denoising and GAN.}. Furthermore, we have also shown that by using 
+models you can beat GI simulation by a significant margin and approach the performance of using real data. \tompson{Change "Multiple GANs" to "ensemble".}
 \begin{comment}
 \subsection{Future Work}
 
